@@ -1,7 +1,3 @@
-## Khóa học
-
-Cơ sở trí tuệ nhân tạo (2324II_AIT2004_1)
-
 # Thông tin dự án
 Dự án cờ vua sử dụng thuật toán Negamax cùng cắt tỉa Alpha Beta
 
