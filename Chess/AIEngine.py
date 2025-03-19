@@ -147,7 +147,7 @@ def moveOrdering(gs, validMoves):
 
     return sortedMoves
 
-def is_move_safe(gs, move):
+def isMoveSafe(gs, move):
     """
     Kiểm tra xem sau khi thực hiện nước đi, quân cờ có an toàn không.
     """
