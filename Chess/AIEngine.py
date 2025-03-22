@@ -2,6 +2,7 @@ import random
 import ChessEngine as CE
 
 pieceScore ={"K": 0, "Q": 10, "R": 5, "B": 3, "N": 3, "P": 1}
+transpositionTable = {}
 
 knightScores = [[1, 1, 1, 1, 1, 1, 1, 1],
                 [1, 2, 2, 2, 2, 2, 2, 1],
@@ -57,44 +58,55 @@ blackPawnScores = [ [0, 0, 0, 0, 0, 0, 0, 0],
                     [8, 8, 8, 8, 8, 8, 8, 8],
                     [8, 8, 8, 8, 8, 8, 8, 8]]
 
-piecePositionScores = {"N" : knightScores, "Q": queenScores, "B":bishopScores, "R":rookScores, "bP":blackPawnScores, "wP":whitePawnScores}
+piecePositionScores = {"N": knightScores, "Q": queenScores, "B": bishopScores, "R": rookScores, "bP": blackPawnScores, "wP": whitePawnScores}
 
 CHECKMATE = 1000
 STALEMATE = 0
-DEPTH = 3
+DEPTH = 1
 
 def findRandomMove(validMoves):
-    return validMoves[random.randint(0, len(validMoves)-1)]
+    return validMoves[random.randint(0, len(validMoves) - 1)]
 
 def findBestMove(gs, validMoves):
     global nextMove
     tempCastleRight = CE.CastleRight(gs.currentCastlingRight.wks, gs.currentCastlingRight.bks, gs.currentCastlingRight.wqs, gs.currentCastlingRight.bqs)
     nextMove = None
-    validMoves = moveOrdering(gs,validMoves)
+    validMoves = moveOrdering(gs, validMoves)
     findMoveNegaMaxAlphaBeta(gs, validMoves, DEPTH, -CHECKMATE,  CHECKMATE, 1 if gs.whiteToMove else -1)
     gs.currentCastlingRight = tempCastleRight
     return nextMove      
 
-def findMoveNegaMaxAlphaBeta(gs, validMoves, depth,alpha, beta, turnMultiplier):
+def findMoveNegaMaxAlphaBeta(gs, validMoves, depth, alpha, beta, turnMultiplier):
     global nextMove
+
+    boardKey = str(gs.board)
+    if boardKey in transpositionTable and transpositionTable[boardKey][0] >= depth:
+        return transpositionTable[boardKey][1]
+
     if depth == 0:
         return turnMultiplier * scoreBoard(gs)
+
     maxScore = -CHECKMATE
     for move in validMoves:
         gs.makeMove(move)
         nextMoves = gs.getValidMoves()
-        nextMoves = moveOrdering(gs,nextMoves)
-        score = -findMoveNegaMaxAlphaBeta(gs, nextMoves, depth - 1,-beta, -alpha, -turnMultiplier)
+        nextMoves = moveOrdering(gs, nextMoves)
+        score = -findMoveNegaMaxAlphaBeta(gs, nextMoves, depth - 1, -beta, -alpha, -turnMultiplier)
+        gs.undoMove()
+
         if score > maxScore:
             maxScore = score
             if depth == DEPTH:
                 nextMove = move
-        gs.undoMove()
-        if maxScore> alpha :
-            alpha = maxScore
+
+        alpha = max(alpha, maxScore)
         if alpha >= beta:
             break
+
+    transpositionTable[boardKey] = (depth, maxScore)
+
     return maxScore
+
 
 def scoreBoard(gs):
     if gs.checkMate:
