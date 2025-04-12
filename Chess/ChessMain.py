@@ -7,6 +7,8 @@ import AIEngine
 import Config
 import ChessEngine
 
+# Khởi tạo các biến toàn cục
+IMAGES = {}
 WIDTH = Config.Config.WIDTH
 HEIGHT = Config.Config.HEIGHT
 MOVE_LOG_W = Config.Config.MOVE_LOG_W
@@ -18,7 +20,7 @@ SQ_LIGHT_COLOR = Config.Config.SQ_LIGHT_COLOR
 SQ_DARK_COLOR = Config.Config.SQ_DARK_COLOR
 TEXT_LIGHT_COLOR = Config.Config.TEXT_LIGHT_COLOR
 TEXT_DARK_COLOR = Config.Config.TEXT_DARK_COLOR
-IMAGES = {}
+FONT = Config.Config.get_font()
 TIME_WHILE_END = 2
 
 # Tải hình ảnh quân cờ (chỉ chạy một lần)
@@ -27,7 +29,7 @@ def loadImages():
     for piece in pieces:
         IMAGES[piece] = p.transform.scale(p.image.load("Chess/assets/images/" + piece + ".png"), (SQ_SIZE - 20, SQ_SIZE - 20))
 
-def handle_mouse_click(e, gs, sqSelected, playerClicks, validMoves, humanTurn):
+def handleMouseClick(e, gs, sqSelected, playerClicks, validMoves, humanTurn):
     moveMade = False
     animate = False
     if not gs.checkMate and not gs.staleMate and humanTurn:
@@ -54,7 +56,7 @@ def handle_mouse_click(e, gs, sqSelected, playerClicks, validMoves, humanTurn):
                 playerClicks = [sqSelected]
     return sqSelected, playerClicks, moveMade, animate
 
-def handle_key_press(e, gs):
+def handleKeyPress(e, gs):
     moveMade = False
     animate = False
     gameOver = False
@@ -68,7 +70,7 @@ def handle_key_press(e, gs):
         action = "PAUSE"
     return moveMade, animate, gameOver, action
 
-def handle_ai_move(gs, validMoves):
+def handleAIMove(gs, validMoves):
     moveMade = False
     animate = False
     AImove = AIEngine.findBestMove(gs, validMoves)
@@ -79,7 +81,7 @@ def handle_ai_move(gs, validMoves):
     animate = True
     return moveMade, animate
 
-def reset_game():
+def resetGame():
     gs = ChessEngine.GameState()
     validMoves = gs.getValidMoves()
     sqSelected = ()
@@ -89,7 +91,6 @@ def reset_game():
     gameOver = False
     return gs, validMoves, sqSelected, playerClicks, moveMade, animate, gameOver
 
-
 def play(AI):
     p.init()
     p.display.set_caption("Play with Player")
@@ -98,7 +99,7 @@ def play(AI):
     screen.fill(p.Color("white"))
     moveLogFont = p.font.SysFont("Arial", 20, False, False)
 
-    gs, validMoves, sqSelected, playerClicks, moveMade, animate, gameOver = reset_game()
+    gs, validMoves, sqSelected, playerClicks, moveMade, animate, gameOver = resetGame()
     loadImages()
     running = True
     playerOne = True
@@ -114,11 +115,11 @@ def play(AI):
                 sys.exit()
             elif e.type == p.MOUSEBUTTONDOWN:
                 if not gameOver and humanTurn:
-                    sqSelected, playerClicks, moveMade, animate = handle_mouse_click(
+                    sqSelected, playerClicks, moveMade, animate = handleMouseClick(
                         e, gs, sqSelected, playerClicks, validMoves, humanTurn
                     )
             elif e.type == p.KEYDOWN:
-                moveUndo, anim, gameOver, action = handle_key_press(e, gs)
+                moveUndo, anim, gameOver, action = handleKeyPress(e, gs)
                 if moveUndo:
                     moveMade = True
                     animate = anim
@@ -131,14 +132,14 @@ def play(AI):
                     if pause_action == "RESUME":
                         running = True
                     elif pause_action == "RESTART":
-                        gs, validMoves, sqSelected, playerClicks, moveMade, animate, gameOver = reset_game()
+                        gs, validMoves, sqSelected, playerClicks, moveMade, animate, gameOver = resetGame()
                         running = True
                     elif pause_action == "QUIT":
                         p.quit()
                         sys.exit()
 
         if not gameOver and not humanTurn:
-            moveMade, animate = handle_ai_move(gs, validMoves)
+            moveMade, animate = handleAIMove(gs, validMoves)
 
         if moveMade:
             if animate:
@@ -172,7 +173,6 @@ def play(AI):
 def drawBoard(screen):
     global colors
     colors = [p.Color(SQ_LIGHT_COLOR), p.Color(SQ_DARK_COLOR)]
-    font = p.font.Font(None, 28)
 
     for row in range(DIMENSION):
         for column in range(DIMENSION):
@@ -230,10 +230,7 @@ def drawMoveLog(screen, gs, font):
         screen.blit(textObject, textLocation)
         textY += textObject.get_height() + lineSpacing
 
-
 def animateMove(move, screen, board, clock):
-    global colors
-    coords = []  # danh sách các tọa độ mà hoạt ảnh sẽ di chuyển qua
     dR = move.endRow - move.startRow
     dC = move.endCol - move.startCol
 
@@ -241,48 +238,42 @@ def animateMove(move, screen, board, clock):
     frameCount = (abs(dR) + abs(dC)) * framesPerSquare
 
     for frame in range(frameCount + 1):
-        r, c = (
-            move.startRow + dR * frame / frameCount,
-            move.startCol + dC * frame / frameCount,
-        )
-        
+        r = move.startRow + dR * frame / frameCount
+        c = move.startCol + dC * frame / frameCount
+
+        # Vẽ lại bàn cờ và quân cờ
         drawBoard(screen)
         drawPiece(screen, board)
 
-        color = colors[(move.endRow + move.endCol) % 2]
+        # Tô lại ô đích trước khi vẽ hoạt ảnh
+        color = p.Color(SQ_LIGHT_COLOR) if (move.endRow + move.endCol) % 2 == 0 else p.Color(SQ_DARK_COLOR)
         endSquare = p.Rect(move.endCol * SQ_SIZE, move.endRow * SQ_SIZE, SQ_SIZE, SQ_SIZE)
         p.draw.rect(screen, color, endSquare)
 
+        # Vẽ lại quân bị bắt (nếu có)
         if move.pieceCaptured != "--":
             if move.isEnpassantMove:
-                enPassantRow = (
-                    move.endRow + 1 if move.pieceCaptured[0] == "b" else move.endRow - 1
-                )
-                endSquare = p.Rect(
-                    move.endCol * SQ_SIZE, enPassantRow * SQ_SIZE, SQ_SIZE, SQ_SIZE
-                )
-            screen.blit(IMAGES[move.pieceCaptured], (move.endCol * SQ_SIZE + 10, move.endRow * SQ_SIZE + 10))
+                enPassantRow = move.endRow + 1 if move.pieceCaptured[0] == "b" else move.endRow - 1
+                endSquare = p.Rect(move.endCol * SQ_SIZE, enPassantRow * SQ_SIZE, SQ_SIZE, SQ_SIZE)
+            screen.blit(IMAGES[move.pieceCaptured],
+                        (move.endCol * SQ_SIZE + 10, move.endRow * SQ_SIZE + 10))
 
-        screen.blit(
-            IMAGES[move.pieceMoved],
-            p.Rect(c * SQ_SIZE + 10, r * SQ_SIZE + 10, SQ_SIZE - 20, SQ_SIZE - 20),
-        )
+        # Vẽ quân đang di chuyển theo từng frame
+        screen.blit(IMAGES[move.pieceMoved],
+                    p.Rect(c * SQ_SIZE + 10, r * SQ_SIZE + 10, SQ_SIZE - 20, SQ_SIZE - 20))
 
+        # Cập nhật màn hình và chờ frame kế
         p.display.flip()
         clock.tick(60)
 
 
-
 def drawText(screen, text):
-    font = p.font.SysFont("Helvitca", 32, True, False)
-    textObject = font.render(text, 0, p.Color("Black"))
+    textObject = FONT.render(text, True, p.Color("Black"))
     textLocation = p.Rect(0, 0, WIDTH, HEIGHT).move(
-        WIDTH / 2 - textObject.get_width() / 2, HEIGHT / 2 - textObject.get_height() / 2
+        WIDTH / 2 - textObject.get_width() / 2,
+        HEIGHT / 2 - textObject.get_height() / 2
     )
     screen.blit(textObject, textLocation)
-    textObject = font.render(text, 0, p.Color("Black"))
-    screen.blit(textObject, textLocation.move(2, 2))
-
 
 def drawGameState(screen, gs, validMoves, sqSelected, moveLogFont):
     drawBoard(screen)
