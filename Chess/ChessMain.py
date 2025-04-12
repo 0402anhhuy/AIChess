@@ -53,9 +53,17 @@ def play(AI):
     playerOne = True  # nếu người chơi đang chơi màu trắng, biến này sẽ là true. Nếu AI đang chơi màu trắng, biến này là False
     playerTwo = AI
     while running:
-        humanTurn = (gs.whiteToMove and playerOne) or (
-            not gs.whiteToMove and not playerTwo
-        )
+        if gs.whiteToMove:  # Nếu là lượt của quân trắng
+            if playerOne:  # Nếu người chơi điều khiển quân trắng
+                humanTurn = True  # Đến lượt người chơi đi
+            else:  # Trường hợp này không xảy ra vì playerOne luôn là True
+                humanTurn = False  
+        else:  # Nếu là lượt của quân đen
+            if playerTwo:  # Nếu AI điều khiển quân đen
+                humanTurn = False  # Đến lượt AI đi
+            else:  # Nếu người chơi điều khiển quân đen
+                humanTurn = True  # Đến lượt người chơi đi
+
         for e in p.event.get():
             if e.type == p.QUIT:
                 running = False
@@ -67,9 +75,7 @@ def play(AI):
                     location = p.mouse.get_pos()  # trả về một cặp toạ độ x y
                     col = location[0] // SQ_SIZE
                     row = location[1] // SQ_SIZE
-                    if (
-                        sqSelected == (row, col) or col >= 8
-                    ):  # hành động chọn 2 lần vào một ô vuông
+                    if (sqSelected == (row, col) or col >= 8):  # hành động chọn 2 lần vào một ô vuông
                         # hoàn tác lại các giá trị
                         sqSelected = ()
                         playerClicks = []
@@ -80,7 +86,6 @@ def play(AI):
                         move = ChessEngine.Move(
                             playerClicks[0], playerClicks[1], gs.board
                         )
-                        print(move.getChessNotation())
                         for i in range(len(validMoves)):
                             if move == validMoves[i]:
                                 gs.makeMove(validMoves[i])
@@ -97,17 +102,35 @@ def play(AI):
                     moveMade = True
                     animate = False
                     gameOver = False
-                if e.key == p.K_r:
-                    gs = ChessEngine.GameState()
-                    validMoves = gs.getValidMoves()
-                    sqSelected = ()
-                    playerClicks = []
-                    moveMade = False
-                    animate = False
-                    gameOver = False
+                # if e.key == p.K_r:
+                #     gs = ChessEngine.GameState()
+                #     validMoves = gs.getValidMoves()
+                #     sqSelected = ()
+                #     playerClicks = []
+                #     moveMade = False
+                #     animate = False
+                #     gameOver = False
                 if e.key == p.K_m:
                     running = False
                     Menu.main_menu()
+                if e.key == p.K_p:
+                    running = False
+                    action = Menu.pause_menu()
+                    if action == "RESUME":
+                        running = True
+                    elif action == "RESTART":
+                        gs = ChessEngine.GameState()
+                        validMoves = gs.getValidMoves()
+                        sqSelected = ()
+                        playerClicks = []
+                        moveMade = False
+                        animate = False
+                        gameOver = False
+                    elif action == "QUIT":
+                        p.quit()
+                        sys.exit()
+                    
+        
         # AI move finder
         if not gameOver and not humanTurn:
             AImove = AIEngine.findBestMove(gs, validMoves)

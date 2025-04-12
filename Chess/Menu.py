@@ -1,6 +1,7 @@
 import pygame, sys
 import Button
 import ChessMain
+import ChessEngine
 import Config
 
 pygame.init()
@@ -79,20 +80,20 @@ def guide_menu():
         SCREEN.blit(BG, (0, 0))
 
         GUIDE_BG = pygame.image.load("Chess/assets/menu/Guide Rect.png")
-        GUIDE_BG_RECT = GUIDE_BG.get_rect(center=(WIDTH / 2, HEIGHT * 0.45))
+        GUIDE_BG_RECT = GUIDE_BG.get_rect(center=(WIDTH / 2, HEIGHT * 0.39))
         SCREEN.blit(GUIDE_BG, GUIDE_BG_RECT)
 
-        GUIDE1_TEXT = get_font(100).render("Z : Undo", True, "WHITE")
-        GUIDE1_RECT = GUIDE1_TEXT.get_rect(center=(WIDTH / 2, HEIGHT * 0.3))
+        GUIDE1_TEXT = get_font(80).render("Z: Undo", True, "WHITE")
+        GUIDE1_RECT = GUIDE1_TEXT.get_rect(center=(WIDTH / 2, HEIGHT * 0.26))
         SCREEN.blit(GUIDE1_TEXT, GUIDE1_RECT)
 
-        GUIDE2_TEXT = get_font(100).render("R : Reset", True, "WHITE")
-        GUIDE2_RECT = GUIDE2_TEXT.get_rect(center=(WIDTH / 2, HEIGHT * 0.45))
+        GUIDE2_TEXT = get_font(80).render("R: Reset", True, "WHITE")
+        GUIDE2_RECT = GUIDE2_TEXT.get_rect(center=(WIDTH / 2, HEIGHT * 0.39))
         SCREEN.blit(GUIDE2_TEXT, GUIDE2_RECT)
 
-        GUILD3_TEXT = get_font(100).render("M : Menu", True, "WHITE")
-        GUIDE3_RECT = GUILD3_TEXT.get_rect(center=(WIDTH / 2, HEIGHT * 0.6))
-        SCREEN.blit(GUILD3_TEXT, GUIDE3_RECT)
+        GUIDE4_TEXT = get_font(80).render("P: Pause", True, "WHITE")
+        GUIDE4_RECT = GUIDE4_TEXT.get_rect(center=(WIDTH / 2, HEIGHT * 0.52))
+        SCREEN.blit(GUIDE4_TEXT, GUIDE4_RECT)
 
         OPTIONS_BACK = Button.Button(
             image=None,
@@ -118,6 +119,13 @@ def guide_menu():
 
 
 def pause_menu():
+    gs = ChessEngine.GameState()
+    validMoves = gs.getValidMoves()
+    sqSelected = ()
+    playerClicks = []
+    moveMade = False
+    animate = False
+    gameOver = False
     while True:
         PAUSE_MOUSE_POS = pygame.mouse.get_pos()
 
@@ -142,7 +150,7 @@ def pause_menu():
             hovering_color="White",
         )
 
-        RESTART_BACK = Button.Button(
+        RESTART_BUTTON = Button.Button(
             image=None,
             pos=(WIDTH / 2, HEIGHT * 0.6),
             text_input="RESTART",
@@ -160,7 +168,7 @@ def pause_menu():
             hovering_color="RED",
         )
 
-        for button in [RESUME_BUTTON, RESTART_BACK, HOME_BUTTON, QUIT_BUTTON]:
+        for button in [HOME_BUTTON, RESUME_BUTTON, RESTART_BUTTON, QUIT_BUTTON]:
             button.changeColor(PAUSE_MOUSE_POS)
             button.update(SCREEN)
 
@@ -168,11 +176,12 @@ def pause_menu():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if RESUME_BUTTON.checkForInput(PAUSE_MOUSE_POS):
-                    continue
-                if RESTART_BACK.checkForInput(PAUSE_MOUSE_POS):
-                    continue
+                    return "RESUME"
+                if RESTART_BUTTON.checkForInput(PAUSE_MOUSE_POS):
+                    return "RESTART"
                 if HOME_BUTTON.checkForInput(PAUSE_MOUSE_POS):
                     AI = None
                     main_menu()
@@ -203,7 +212,7 @@ def end_menu(end_text):
             hovering_color="GREEN",
         )
 
-        RESTART_BACK = Button.Button(
+        RESTART_BUTTON = Button.Button(
             image=None,
             pos=(WIDTH / 2, HEIGHT * 0.6),
             text_input="RESTART",
@@ -221,7 +230,7 @@ def end_menu(end_text):
             hovering_color="RED",
         )
 
-        for button in [HOME_BUTTON, RESTART_BACK, QUIT_BUTTON]:
+        for button in [HOME_BUTTON, RESTART_BUTTON, QUIT_BUTTON]:
             button.changeColor(END_MOUSE_POS)
             button.update(SCREEN)
 
@@ -232,7 +241,7 @@ def end_menu(end_text):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if HOME_BUTTON.checkForInput(END_MOUSE_POS):
                     main_menu()
-                if RESTART_BACK.checkForInput(END_MOUSE_POS):
+                if RESTART_BUTTON.checkForInput(END_MOUSE_POS):
                     ChessMain.play(AI)
                 if QUIT_BUTTON.checkForInput(END_MOUSE_POS):
                     pygame.quit()

@@ -62,7 +62,7 @@ piecePositionScores = {"N": knightScores, "Q": queenScores, "B": bishopScores, "
 
 CHECKMATE = 1000
 STALEMATE = 0
-DEPTH = 1
+DEPTH = 2
 
 def findRandomMove(validMoves):
     return validMoves[random.randint(0, len(validMoves) - 1)]
@@ -172,6 +172,3 @@ def isMoveSafe(gs, move):
             return False  # Nếu có nước đi của đối thủ ăn được quân cờ tại vị trí mới, nước đi không an toàn
 
     return True  # Nếu không có nước đi nào của đối thủ ăn được quân cờ, nước đi an toàn
-
-       
-
