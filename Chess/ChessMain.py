@@ -27,10 +27,67 @@ def loadImages():
     for piece in pieces:
         IMAGES[piece] = p.transform.scale(p.image.load("Chess/assets/images/" + piece + ".png"), (SQ_SIZE - 20, SQ_SIZE - 20))
 
+def handle_mouse_click(e, gs, sqSelected, playerClicks, validMoves, humanTurn):
+    moveMade = False
+    animate = False
+    if not gs.checkMate and not gs.staleMate and humanTurn:
+        location = p.mouse.get_pos()
+        col = location[0] // SQ_SIZE
+        row = location[1] // SQ_SIZE
+        if sqSelected == (row, col) or col >= 8:
+            sqSelected = ()
+            playerClicks = []
+        else:
+            sqSelected = (row, col)
+            playerClicks.append(sqSelected)
+        if len(playerClicks) == 2:
+            move = ChessEngine.Move(playerClicks[0], playerClicks[1], gs.board)
+            for validMove in validMoves:
+                if move == validMove:
+                    gs.makeMove(validMove)
+                    moveMade = True
+                    animate = True
+                    sqSelected = ()
+                    playerClicks = []
+                    break
+            if not moveMade:
+                playerClicks = [sqSelected]
+    return sqSelected, playerClicks, moveMade, animate
 
-"""
-phần chính của code. đoạn này sẽ kiểm soát đầu vào của người dùng và cập nhập đồ hoạ
-"""
+def handle_key_press(e, gs):
+    moveMade = False
+    animate = False
+    gameOver = False
+    action = None
+    if e.key == p.K_z:
+        gs.undoMove()
+        moveMade = True
+    elif e.key == p.K_m:
+        action = "MENU"
+    elif e.key == p.K_p:
+        action = "PAUSE"
+    return moveMade, animate, gameOver, action
+
+def handle_ai_move(gs, validMoves):
+    moveMade = False
+    animate = False
+    AImove = AIEngine.findBestMove(gs, validMoves)
+    if AImove is None:
+        AImove = AIEngine.findRandomMove(validMoves)
+    gs.makeMove(AImove)
+    moveMade = True
+    animate = True
+    return moveMade, animate
+
+def reset_game():
+    gs = ChessEngine.GameState()
+    validMoves = gs.getValidMoves()
+    sqSelected = ()
+    playerClicks = []
+    moveMade = False
+    animate = False
+    gameOver = False
+    return gs, validMoves, sqSelected, playerClicks, moveMade, animate, gameOver
 
 
 def play(AI):
@@ -40,105 +97,49 @@ def play(AI):
     clock = p.time.Clock()
     screen.fill(p.Color("white"))
     moveLogFont = p.font.SysFont("Arial", 20, False, False)
-    # khởi tạo một game state ban đầu
-    gs = ChessEngine.GameState()
-    validMoves = gs.getValidMoves()
-    moveMade = False  # một biến cờ khi mà một nước đi được tạo ra
-    animate = False  # một biến để ktra xem khi nào nên tạo hoạt ảnh cho nước đi
+
+    gs, validMoves, sqSelected, playerClicks, moveMade, animate, gameOver = reset_game()
     loadImages()
     running = True
-    sqSelected = ()  # ko có hình vuông nào được chọn, theo dõi lần click chuột cuối cùng của user ( tuple : (row, col))
-    playerClicks = []  # keep track of player clicks (two tuple [(6,4), (4,4)])
-    gameOver = False
-    playerOne = True  # nếu người chơi đang chơi màu trắng, biến này sẽ là true. Nếu AI đang chơi màu trắng, biến này là False
+    playerOne = True
     playerTwo = AI
+
     while running:
-        if gs.whiteToMove:  # Nếu là lượt của quân trắng
-            if playerOne:  # Nếu người chơi điều khiển quân trắng
-                humanTurn = True  # Đến lượt người chơi đi
-            else:  # Trường hợp này không xảy ra vì playerOne luôn là True
-                humanTurn = False  
-        else:  # Nếu là lượt của quân đen
-            if playerTwo:  # Nếu AI điều khiển quân đen
-                humanTurn = False  # Đến lượt AI đi
-            else:  # Nếu người chơi điều khiển quân đen
-                humanTurn = True  # Đến lượt người chơi đi
+        humanTurn = (gs.whiteToMove and playerOne) or (not gs.whiteToMove and not playerTwo)
 
         for e in p.event.get():
             if e.type == p.QUIT:
                 running = False
                 p.quit()
                 sys.exit()
-                break
             elif e.type == p.MOUSEBUTTONDOWN:
                 if not gameOver and humanTurn:
-                    location = p.mouse.get_pos()  # trả về một cặp toạ độ x y
-                    col = location[0] // SQ_SIZE
-                    row = location[1] // SQ_SIZE
-                    if (sqSelected == (row, col) or col >= 8):  # hành động chọn 2 lần vào một ô vuông
-                        # hoàn tác lại các giá trị
-                        sqSelected = ()
-                        playerClicks = []
-                    else:
-                        sqSelected = (row, col)
-                        playerClicks.append(sqSelected)
-                    if len(playerClicks) == 2:  # sau 2 lan click chuot
-                        move = ChessEngine.Move(
-                            playerClicks[0], playerClicks[1], gs.board
-                        )
-                        for i in range(len(validMoves)):
-                            if move == validMoves[i]:
-                                gs.makeMove(validMoves[i])
-                                moveMade = True
-                                animate = True
-                                sqSelected = ()
-                                playerClicks = []
-                        if not moveMade:
-                            playerClicks = [sqSelected]
-            # key handler
+                    sqSelected, playerClicks, moveMade, animate = handle_mouse_click(
+                        e, gs, sqSelected, playerClicks, validMoves, humanTurn
+                    )
             elif e.type == p.KEYDOWN:
-                if e.key == p.K_z:  # undo
-                    gs.undoMove()
+                moveUndo, anim, gameOver, action = handle_key_press(e, gs)
+                if moveUndo:
                     moveMade = True
-                    animate = False
-                    gameOver = False
-                # if e.key == p.K_r:
-                #     gs = ChessEngine.GameState()
-                #     validMoves = gs.getValidMoves()
-                #     sqSelected = ()
-                #     playerClicks = []
-                #     moveMade = False
-                #     animate = False
-                #     gameOver = False
-                if e.key == p.K_m:
+                    animate = anim
+                if action == "MENU":
                     running = False
                     Menu.main_menu()
-                if e.key == p.K_p:
+                elif action == "PAUSE":
                     running = False
-                    action = Menu.pause_menu()
-                    if action == "RESUME":
+                    pause_action = Menu.pause_menu()
+                    if pause_action == "RESUME":
                         running = True
-                    elif action == "RESTART":
-                        gs = ChessEngine.GameState()
-                        validMoves = gs.getValidMoves()
-                        sqSelected = ()
-                        playerClicks = []
-                        moveMade = False
-                        animate = False
-                        gameOver = False
-                    elif action == "QUIT":
+                    elif pause_action == "RESTART":
+                        gs, validMoves, sqSelected, playerClicks, moveMade, animate, gameOver = reset_game()
+                        running = True
+                    elif pause_action == "QUIT":
                         p.quit()
                         sys.exit()
-                    
-        
-        # AI move finder
+
         if not gameOver and not humanTurn:
-            AImove = AIEngine.findBestMove(gs, validMoves)
-            if AImove is None:
-                AImove = AIEngine.findRandomMove(validMoves)
-            gs.makeMove(AImove)
-            moveMade = True
-            animate = True
+            moveMade, animate = handle_ai_move(gs, validMoves)
+
         if moveMade:
             if animate:
                 animateMove(gs.moveLog[-1], screen, gs.board, clock)
@@ -152,26 +153,19 @@ def play(AI):
         if gs.checkMate:
             gameOver = True
             running = False
-            if gs.whiteToMove:
-                end_text = "Black wins!"
-                # drawText(screen, " Black wins by checkmate")
-            else:
-                end_text = "White wins!"
-                # drawText(screen, " White wins by checkmate")
+            end_text = "Black wins!" if gs.whiteToMove else "White wins!"
         elif gs.staleMate:
             gameOver = True
             running = False
             end_text = "Draw!"
-            # drawText(screen, "Stalemate")
 
         clock.tick(MAX_FPS)
         p.display.flip()
 
         if gameOver:
             start_time = time.time()
-            while True:
-                if time.time() - start_time > TIME_WHILE_END:
-                    break
+            while time.time() - start_time < TIME_WHILE_END:
+                pass
             Menu.end_menu(end_text)
 
 # Vẽ bàn cờ
