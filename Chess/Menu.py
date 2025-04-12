@@ -87,7 +87,7 @@ def guide_menu():
 
         # Hiển thị các dòng hướng dẫn
         draw_guide_text("Z: Undo", 0.26)
-        draw_guide_text("R: Reset", 0.39)
+        draw_guide_text("M: Menu", 0.39)
         draw_guide_text("P: Pause", 0.52)
 
         # Nút Back
