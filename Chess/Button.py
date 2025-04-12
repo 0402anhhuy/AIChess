@@ -35,9 +35,6 @@ class Button:
         return self.rect.collidepoint(position)  # Dùng pygame.collidepoint() để đơn giản hóa
 
     def changeColor(self, position):
-        """
-            Thay đổi màu văn bản của button khi chuột hover lên
-        """
         if self.rect.collidepoint(position):  # Nếu chuột hover lên button
             self.text = self.font.render(self.text_input, True, self.hovering_color)
         else:
