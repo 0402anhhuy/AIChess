@@ -4,19 +4,41 @@ import ChessMain
 import ChessEngine
 import Config
 
+import pygame
+import sys
+import Config
+import ChessMain
+import Button
+
 pygame.init()
 
 WIDTH = Config.Config.WIDTH + Config.Config.MOVE_LOG_W
 HEIGHT = Config.Config.HEIGHT
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
-AI = None
-BG = pygame.transform.scale(pygame.image.load("Chess/assets/menu/Background.png"), (WIDTH, HEIGHT))
-
 pygame.display.set_caption("Menu")
+
+BG = pygame.transform.scale(pygame.image.load("Chess/assets/menu/Background.png"), (WIDTH, HEIGHT))
 
 # Hàm tạo font
 def get_font(size):
     return pygame.font.SysFont("Inter", size)
+
+# Hàm tạo nút
+def create_button(text, pos, font_size, base_color, hovering_color):
+    return Button.Button(
+        image=None,
+        pos=pos,
+        text_input=text,
+        font=get_font(font_size),
+        base_color=base_color,
+        hovering_color=hovering_color,
+    )
+
+# Hàm hiển thị tất cả các nút
+def draw_buttons(buttons, mouse_pos):
+    for button in buttons:
+        button.changeColor(mouse_pos)
+        button.update(SCREEN)
 
 # Menu chơi game
 def play_menu():
@@ -25,152 +47,80 @@ def play_menu():
         SCREEN.fill("BLACK")
         SCREEN.blit(BG, (0, 0))
 
-        PLAY_BACK = Button.Button(
-            image=None,
-            pos=(WIDTH * 0.5, HEIGHT * 0.75),
-            text_input="BACK",
-            font=get_font(100),
-            base_color="White",
-            hovering_color="Green",
-        )
+        BACK_BUTTON = create_button("BACK", (WIDTH * 0.5, HEIGHT * 0.75), 100, "White", "Green")
+        PvP_BUTTON = create_button("PvP", (WIDTH * 0.5, HEIGHT * 0.25), 100, "#d7fcd4", "Blue")
+        PvE_BUTTON = create_button("PvE", (WIDTH * 0.5, HEIGHT * 0.5), 100, "#d7fcd4", "Yellow")
 
-        PvP_BUTTON = Button.Button(
-            image=None,
-            pos=(WIDTH * 0.5, HEIGHT * 0.25),
-            text_input="PvP",
-            font=get_font(100),
-            base_color="#d7fcd4",
-            hovering_color="Blue",
-        )
-
-        PvE_BUTTON = Button.Button(
-            image=None,
-            pos=(WIDTH * 0.5, HEIGHT * 0.5),
-            text_input="PvE",
-            font=get_font(100),
-            base_color="#d7fcd4",
-            hovering_color="Yellow",
-        )
-
-        for button in [PLAY_BACK, PvP_BUTTON, PvE_BUTTON]:
-            button.changeColor(PLAY_MOUSE_POS)
-            button.update(SCREEN)
+        buttons = [BACK_BUTTON, PvP_BUTTON, PvE_BUTTON]
+        draw_buttons(buttons, PLAY_MOUSE_POS)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if PLAY_BACK.checkForInput(PLAY_MOUSE_POS):
+                if BACK_BUTTON.checkForInput(PLAY_MOUSE_POS):
                     main_menu()
-                if PvE_BUTTON.checkForInput(PLAY_MOUSE_POS):
-                    AI = True
-                    ChessMain.play(AI)
-                if PvP_BUTTON.checkForInput(PLAY_MOUSE_POS):
-                    AI = False
-                    ChessMain.play(AI)
+                elif PvE_BUTTON.checkForInput(PLAY_MOUSE_POS):
+                    ChessMain.play(True)
+                elif PvP_BUTTON.checkForInput(PLAY_MOUSE_POS):
+                    ChessMain.play(False)
+
         pygame.display.update()
 
-# Menu hướng dẫn
+def draw_guide_text(text, center_y):
+    guide_text = get_font(80).render(text, True, "WHITE")
+    guide_rect = guide_text.get_rect(center=(WIDTH / 2, HEIGHT * center_y))
+    SCREEN.blit(guide_text, guide_rect)
+
 def guide_menu():
     while True:
-        OPTIONS_MOUSE_POS = pygame.mouse.get_pos()
+        mouse_pos = pygame.mouse.get_pos()
 
         SCREEN.fill("BLACK")
         SCREEN.blit(BG, (0, 0))
 
-        GUIDE_BG = pygame.image.load("Chess/assets/menu/Guide Rect.png")
-        GUIDE_BG_RECT = GUIDE_BG.get_rect(center=(WIDTH / 2, HEIGHT * 0.39))
-        SCREEN.blit(GUIDE_BG, GUIDE_BG_RECT)
+        # Hiển thị khung hướng dẫn
+        guide_bg = pygame.image.load("Chess/assets/menu/Guide Rect.png")
+        guide_bg_rect = guide_bg.get_rect(center=(WIDTH / 2, HEIGHT * 0.39))
+        SCREEN.blit(guide_bg, guide_bg_rect)
 
-        GUIDE1_TEXT = get_font(80).render("Z: Undo", True, "WHITE")
-        GUIDE1_RECT = GUIDE1_TEXT.get_rect(center=(WIDTH / 2, HEIGHT * 0.26))
-        SCREEN.blit(GUIDE1_TEXT, GUIDE1_RECT)
+        # Hiển thị các dòng hướng dẫn
+        draw_guide_text("Z: Undo", 0.26)
+        draw_guide_text("R: Reset", 0.39)
+        draw_guide_text("P: Pause", 0.52)
 
-        GUIDE2_TEXT = get_font(80).render("R: Reset", True, "WHITE")
-        GUIDE2_RECT = GUIDE2_TEXT.get_rect(center=(WIDTH / 2, HEIGHT * 0.39))
-        SCREEN.blit(GUIDE2_TEXT, GUIDE2_RECT)
-
-        GUIDE4_TEXT = get_font(80).render("P: Pause", True, "WHITE")
-        GUIDE4_RECT = GUIDE4_TEXT.get_rect(center=(WIDTH / 2, HEIGHT * 0.52))
-        SCREEN.blit(GUIDE4_TEXT, GUIDE4_RECT)
-
-        OPTIONS_BACK = Button.Button(
-            image=None,
-            pos=(WIDTH / 2, HEIGHT * 0.8),
-            text_input="BACK",
-            font=get_font(100),
-            base_color="White",
-            hovering_color="Green",
-        )
-
-        OPTIONS_BACK.changeColor(OPTIONS_MOUSE_POS)
-        OPTIONS_BACK.update(SCREEN)
+        # Nút Back
+        back_button = create_button("BACK", (WIDTH / 2, HEIGHT * 0.8), 100, "White", "Green")
+        draw_buttons([back_button], mouse_pos)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if OPTIONS_BACK.checkForInput(OPTIONS_MOUSE_POS):
+                if back_button.checkForInput(mouse_pos):
                     main_menu()
 
         pygame.display.update()
 
 
 def pause_menu():
-    gs = ChessEngine.GameState()
-    validMoves = gs.getValidMoves()
-    sqSelected = ()
-    playerClicks = []
-    moveMade = False
-    animate = False
-    gameOver = False
     while True:
-        PAUSE_MOUSE_POS = pygame.mouse.get_pos()
+        mouse_pos = pygame.mouse.get_pos()
 
         SCREEN.fill("BLACK")
         SCREEN.blit(BG, (0, 0))
 
-        HOME_BUTTON = Button.Button(
-            image=None,
-            pos=(WIDTH / 2, HEIGHT * 0.2),
-            text_input="HOME",
-            font=get_font(75),
-            base_color="#d7fcd4",
-            hovering_color="GREEN",
-        )
+        # Tạo các nút sử dụng hàm tái sử dụng
+        buttons = [
+            create_button("HOME", (WIDTH / 2, HEIGHT * 0.2), 75, "#d7fcd4", "GREEN"),
+            create_button("RESUME", (WIDTH / 2, HEIGHT * 0.4), 75, "#d7fcd4", "WHITE"),
+            create_button("RESTART", (WIDTH / 2, HEIGHT * 0.6), 75, "#d7fcd4", "WHITE"),
+            create_button("QUIT", (WIDTH * 0.5, HEIGHT * 0.8), 75, "WHITE", "RED"),
+        ]
 
-        RESUME_BUTTON = Button.Button(
-            image=None,
-            pos=(WIDTH / 2, HEIGHT * 0.4),
-            text_input="RESUME",
-            font=get_font(75),
-            base_color="#d7fcd4",
-            hovering_color="White",
-        )
-
-        RESTART_BUTTON = Button.Button(
-            image=None,
-            pos=(WIDTH / 2, HEIGHT * 0.6),
-            text_input="RESTART",
-            font=get_font(75),
-            base_color="#d7fcd4",
-            hovering_color="White",
-        )
-
-        QUIT_BUTTON = Button.Button(
-            image=None,
-            pos=(WIDTH * 0.5, HEIGHT * 0.8),
-            text_input="QUIT",
-            font=get_font(75),
-            base_color="WHITE",
-            hovering_color="RED",
-        )
-
-        for button in [HOME_BUTTON, RESUME_BUTTON, RESTART_BUTTON, QUIT_BUTTON]:
-            button.changeColor(PAUSE_MOUSE_POS)
-            button.update(SCREEN)
+        draw_buttons(buttons, mouse_pos)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -178,128 +128,84 @@ def pause_menu():
                 sys.exit()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if RESUME_BUTTON.checkForInput(PAUSE_MOUSE_POS):
+                if buttons[1].checkForInput(mouse_pos):  # RESUME
                     return "RESUME"
-                if RESTART_BUTTON.checkForInput(PAUSE_MOUSE_POS):
+                if buttons[2].checkForInput(mouse_pos):  # RESTART
                     return "RESTART"
-                if HOME_BUTTON.checkForInput(PAUSE_MOUSE_POS):
-                    AI = None
+                if buttons[0].checkForInput(mouse_pos):  # HOME
                     main_menu()
-                if QUIT_BUTTON.checkForInput(PAUSE_MOUSE_POS):
+                if buttons[3].checkForInput(mouse_pos):  # QUIT
                     pygame.quit()
                     sys.exit()
 
         pygame.display.update()
 
-# Menu kết thúc game
+
 def end_menu(end_text):
     while True:
-        END_MOUSE_POS = pygame.mouse.get_pos()
+        mouse_pos = pygame.mouse.get_pos()
 
         SCREEN.fill("BLACK")
         SCREEN.blit(BG, (0, 0))
 
-        END_TEXT = get_font(75).render(end_text, True, "WHITE")
-        END_RECT = END_TEXT.get_rect(center=(WIDTH / 2, HEIGHT * 0.3))
-        SCREEN.blit(END_TEXT, END_RECT)
+        # Hiển thị kết quả trận đấu
+        end_text_surface = get_font(75).render(end_text, True, "WHITE")
+        end_text_rect = end_text_surface.get_rect(center=(WIDTH / 2, HEIGHT * 0.3))
+        SCREEN.blit(end_text_surface, end_text_rect)
 
-        HOME_BUTTON = Button.Button(
-            image=None,
-            pos=(WIDTH / 2, HEIGHT * 0.45),
-            text_input="HOME",
-            font=get_font(80),
-            base_color="#d7fcd4",
-            hovering_color="GREEN",
-        )
+        # Tạo các nút
+        buttons = [
+            create_button("HOME", (WIDTH / 2, HEIGHT * 0.45), 80, "#d7fcd4", "GREEN"),
+            create_button("RESTART", (WIDTH / 2, HEIGHT * 0.6), 80, "#d7fcd4", "WHITE"),
+            create_button("QUIT", (WIDTH * 0.5, HEIGHT * 0.75), 80, "#d7fcd4", "RED"),
+        ]
 
-        RESTART_BUTTON = Button.Button(
-            image=None,
-            pos=(WIDTH / 2, HEIGHT * 0.6),
-            text_input="RESTART",
-            font=get_font(80),
-            base_color="#d7fcd4",
-            hovering_color="White",
-        )
-
-        QUIT_BUTTON = Button.Button(
-            image=None,
-            pos=(WIDTH * 0.5, HEIGHT * 0.75),
-            text_input="QUIT",
-            font=get_font(80),
-            base_color="#d7fcd4",
-            hovering_color="RED",
-        )
-
-        for button in [HOME_BUTTON, RESTART_BUTTON, QUIT_BUTTON]:
-            button.changeColor(END_MOUSE_POS)
-            button.update(SCREEN)
+        draw_buttons(buttons, mouse_pos)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if HOME_BUTTON.checkForInput(END_MOUSE_POS):
+                if buttons[0].checkForInput(mouse_pos):  # HOME
                     main_menu()
-                if RESTART_BUTTON.checkForInput(END_MOUSE_POS):
-                    ChessMain.play(AI)
-                if QUIT_BUTTON.checkForInput(END_MOUSE_POS):
+                if buttons[1].checkForInput(mouse_pos):  # RESTART
+                    ChessMain.play(False)
+                if buttons[2].checkForInput(mouse_pos):  # QUIT
                     pygame.quit()
                     sys.exit()
 
         pygame.display.update()
 
-# Menu chính (Khỏi động game)
 def main_menu():
     while True:
         SCREEN.blit(BG, (0, 0))
-        MENU_MOUSE_POS = pygame.mouse.get_pos()
-        MENU_TEXT = get_font(170).render("CHESS", True, "#b68f40")
-        MENU_RECT = MENU_TEXT.get_rect(center=(WIDTH * 0.5, HEIGHT * 0.15))
+        mouse_pos = pygame.mouse.get_pos()
 
-        PLAY_BUTTON = Button.Button(
-            image=None,
-            pos=(WIDTH * 0.5, HEIGHT * 0.4),
-            text_input="PLAY",
-            font=get_font(120),
-            base_color="#d7fcd4",
-            hovering_color="White"
-        )
+        # Hiển thị tiêu đề "CHESS"
+        menu_text_surface = get_font(170).render("CHESS", True, "#b68f40")
+        menu_text_rect = menu_text_surface.get_rect(center=(WIDTH * 0.5, HEIGHT * 0.15))
+        SCREEN.blit(menu_text_surface, menu_text_rect)
 
-        GUIDE_BUTTON = Button.Button(
-            image=None,
-            pos=(WIDTH * 0.5, HEIGHT * 0.6),
-            text_input="GUIDE",
-            font=get_font(120),
-            base_color="#d7fcd4",
-            hovering_color="White"
-        )
+        # Tạo các nút
+        buttons = [
+            create_button("PLAY", (WIDTH * 0.5, HEIGHT * 0.4), 120, "#d7fcd4", "White"),
+            create_button("GUIDE", (WIDTH * 0.5, HEIGHT * 0.6), 120, "#d7fcd4", "White"),
+            create_button("QUIT", (WIDTH * 0.5, HEIGHT * 0.8), 120, "#d7fcd4", "RED")
+        ]
 
-        QUIT_BUTTON = Button.Button(
-            image=None,
-            pos=(WIDTH * 0.5, HEIGHT * 0.8),
-            text_input="QUIT",
-            font=get_font(120),
-            base_color="#d7fcd4",
-            hovering_color="RED"
-        )
-
-        SCREEN.blit(MENU_TEXT, MENU_RECT)
-
-        for button in [PLAY_BUTTON, GUIDE_BUTTON, QUIT_BUTTON]:
-            button.changeColor(MENU_MOUSE_POS)
-            button.update(SCREEN)
+        draw_buttons(buttons, mouse_pos)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS):
+                if buttons[0].checkForInput(mouse_pos):  # PLAY
                     play_menu()
-                if GUIDE_BUTTON.checkForInput(MENU_MOUSE_POS):
+                if buttons[1].checkForInput(mouse_pos):  # GUIDE
                     guide_menu()
-                if QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
+                if buttons[2].checkForInput(mouse_pos):  # QUIT
                     pygame.quit()
                     sys.exit()
 
