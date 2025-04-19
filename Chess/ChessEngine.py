@@ -1,6 +1,3 @@
-"""
-    File này chịu trách nhiệm về việc xử lý các nước đi của các quân cờ
-"""
 class Move():
     """
            a b  c d  e f  g h
@@ -13,6 +10,7 @@ class Move():
         2 ⬜⬛⬜⬛⬜⬛⬜⬛  (row 6)
         1 ⬛⬜⬛⬜⬛⬜⬛⬜  (row 7)
     """
+
     # Ánh xạ từ vị trí hàng và cột sang vị trí hàng và cột (1 - 8)
     ranksToRows = {"1": 7, "2": 6, "3": 5, "4": 4, "5": 3, "6": 2, "7": 1, "8": 0}
     rowsToRanks = {}
@@ -60,10 +58,8 @@ class Move():
 
     def getRankFile(self, r, c):    
         return self.colsToFiles[c] + self.rowsToRanks[r]
-    
 
     def __str__(self):
-        # castle move
         if self.isCastleMove:
             return "O-O" if self.endCol == 6 else "O-O-O"
         
@@ -259,7 +255,7 @@ class GameState():
 
      # Cập nhập quyền nhập thành - khi nước đi là nước đi của xe hoặc của vua        
     def updateCastleRight(self, move):
-        # kiểm tra xem quân cờ di chuyển có phải là quân xe hay quân vua hay không
+        # Kiểm tra xem quân cờ di chuyển có phải là quân xe hay quân vua hay không
         if move.pieceMoved == 'wK':
             self.currentCastlingRight.wks = False
             self.currentCastlingRight.wqs = False
@@ -279,7 +275,7 @@ class GameState():
                 elif move.startCol == 7:
                     self.currentCastlingRight.bks = False
 
-        # nếu quân bị bắt là quân xe
+        # Nếu quân bị bắt là quân xe
         if move.pieceCaptured == 'wR':
             if move.endRow == 7:
                 if move.endCol == 0:
@@ -479,13 +475,13 @@ class GameState():
         if (self.whiteToMove and self.currentCastlingRight.wqs) or (not self.whiteToMove and self.currentCastlingRight.bqs):
             self.getQueenSideCastleMove(r, c, moves)
         
-    # thực hiện nước đi nhập thành ở hướng bên phải vua
+    # Thực hiện nước đi nhập thành ở hướng bên phải vua
     def getKingSideCastleMove(self, r, c, moves):
         if self.board[r][c + 1] == '--' and self.board[r][c + 2] == '--':
             if not self.squareUnderAttack(r, c + 1) and not self.squareUnderAttack(r, c + 2): # nếu 2 ô bên phải vua không trong trạng thái có thể bị tấn công
                 moves.append(Move((r, c), (r, c + 2), self.board, isCastleMove = True))
 
-    # thực hiện nước đi nhập thành ở phía bên quân hậu (bên trái của vua)
+    # Thực hiện nước đi nhập thành ở phía bên quân hậu (bên trái của vua)
     def getQueenSideCastleMove(self, r, c, moves):
         if self.board[r][c - 1] == '--' and self.board[r][c - 2] == '--' and self.board[r][c - 3] == '--':
             if not self.squareUnderAttack(r, c - 1) and not self.squareUnderAttack(r, c-2): # nếu 2 ô bên trái vua không trong trạng thái có thể bị tấn công
