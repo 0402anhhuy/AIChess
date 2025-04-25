@@ -57,19 +57,19 @@ class Operator:
             return True
         return all(cell != 0 for cell in boardData)
 
-    def Win(self, s):
-        if s.data is None:
+    def Win(self, state):
+        if state.data is None:
             return False
-        sz = s.N
-        data = s.data
-        for i in range(sz):
-            if data[i * sz + 0] != 0 and data[i * sz + 0] == data[i * sz + 1] == data[i * sz + 2]:
+        boardSize = state.N
+        boardData = state.data
+        for row in range(boardSize):
+            if boardData[row * boardSize + 0] != 0 and boardData[row * boardSize + 0] == boardData[row * boardSize + 1] == boardData[row * boardSize + 2]:
                 return True
-            if data[0 * sz + i] != 0 and data[0 * sz + i] == data[1 * sz + i] == data[2 * sz + i]:
+            if boardData[0 * boardSize + row] != 0 and boardData[0 * boardSize + row] == boardData[1 * boardSize + row] == boardData[2 * boardSize + row]:
                 return True
-        if data[0] != 0 and data[0] == data[4] == data[8]:
+        if boardData[0] != 0 and boardData[0] == boardData[4] == boardData[8]:
             return True
-        if data[2] != 0 and data[2] == data[4] == data[6]:
+        if boardData[2] != 0 and boardData[2] == boardData[4] == boardData[6]:
             return True
         return False
 
