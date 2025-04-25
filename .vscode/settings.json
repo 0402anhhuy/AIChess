@@ -4,5 +4,10 @@
         "plaintext": false,
         "markdown": true,
         "scminput": false
-    }
+    },
+    "python.testing.pytestArgs": [
+        "Chess"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
 }

@@ -79,36 +79,36 @@ class Operator:
             return 1 if self.checkMyTurn(s) else -1
         return 0
 
-    def AlphaBeta(self, s, d, a, b, mp):
-        if self.isEndNode(s) or d == 0:
-            return self.Value(s)
+    def AlphaBeta(self, state, depth, alpha, beta, maximizingPlayer):
+        if self.isEndNode(state) or depth == 0:
+            return self.Value(state)
 
-        sz = s.N
-        if mp:
-            for i in range(sz):
-                for j in range(sz):
-                    child = Operator(i, j).Move(s)
-                    if child is None:
+        boardSize = state.N
+        if maximizingPlayer:
+            for row in range(boardSize):
+                for col in range(boardSize):
+                    childState = Operator(row, col).Move(state)
+                    if childState is None:
                         continue
-                    tmp = self.AlphaBeta(child, d - 1, a, b, False)
-                    a = max(a, tmp)
-                    if a >= b:
-                        return a
-            return a
+                    evaluation = self.AlphaBeta(childState, depth - 1, alpha, beta, False)
+                    alpha = max(alpha, evaluation)
+                    if alpha >= beta:
+                        return alpha
+            return alpha
         else:
-            for i in range(sz):
-                for j in range(sz):
-                    child = Operator(i, j).Move(s)
-                    if child is None:
+            for row in range(boardSize):
+                for col in range(boardSize):
+                    childState = Operator(row, col).Move(state)
+                    if childState is None:
                         continue
-                    tmp = self.AlphaBeta(child, d - 1, a, b, True)
-                    b = min(b, tmp)
-                    if a >= b:
-                        return b
-            return b
+                    evaluation = self.AlphaBeta(childState, depth - 1, alpha, beta, True)
+                    beta = min(beta, evaluation)
+                    if alpha >= beta:
+                        return beta
+            return beta
 
-    def Minimax(self, s, d, mp):
-        return self.AlphaBeta(s, d, -2, 2, mp)
+    def Minimax(self, state, depth, maximizingPlayer):
+        return self.AlphaBeta(state, depth, -2, 2, maximizingPlayer)
 
     def Run(self):
         player = 1
