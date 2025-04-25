@@ -73,13 +73,13 @@ class Operator:
             return True
         return False
 
-    def checkMyTurn(self, s):
-        empty = sum(1 for x in s.data if x == 0)
-        return empty % 2 == 0
+    def checkMyTurn(self, state):
+        emptyCells = sum(1 for cell in state.data if cell == 0)
+        return emptyCells % 2 == 0
 
-    def Value(self, s):
-        if self.Win(s):
-            return 1 if self.checkMyTurn(s) else -1
+    def Value(self, state):
+        if self.Win(state):
+            return 1 if self.checkMyTurn(state) else -1
         return 0
 
     def AlphaBeta(self, state, depth, alpha, beta, maximizingPlayer):
@@ -116,50 +116,50 @@ class Operator:
     def Run(self):
         player = 1
         turn = 0
-        s = State([0] * 9)
-        s.Print()
+        state = State([0] * 9)
+        state.Print()
         while True:
             if (turn % 2) + 1 == player:
                 print("Player's turn:")
                 moved = False
                 while not moved:
                     try:
-                        x = int(input("Enter row (0-2): "))
-                        y = int(input("Enter col (0-2): "))
-                        child = Operator(x, y).Move(s)
-                        if child:
-                            s = child
+                        row = int(input("Enter row (0-2): "))
+                        col = int(input("Enter col (0-2): "))
+                        childState = Operator(row, col).Move(state)
+                        if childState:
+                            state = childState
                             moved = True
                         else:
                             print("Invalid move. Try again.")
                     except ValueError:
                         print("Invalid input. Use integers 0, 1, or 2.")
-                if self.Win(s):
-                    s.Print()
+                if self.Win(state):
+                    state.Print()
                     print("Player wins!")
                     break
             else:
                 print("AI is thinking...")
-                best_score = 2
-                best_move = None
-                for i in range(3):
-                    for j in range(3):
-                        child = Operator(i, j).Move(s)
-                        if child is None:
+                bestScore = 2
+                bestMove = None
+                for row in range(3):
+                    for col in range(3):
+                        childState = Operator(row, col).Move(state)
+                        if childState is None:
                             continue
-                        score = self.Minimax(child, 5, True)
-                        print(f"AI considers move ({i}, {j}) with score {score}")
-                        if score < best_score:
-                            best_score = score
-                            best_move = child
-                s = best_move
-                if self.Win(s):
-                    s.Print()
+                        score = self.Minimax(childState, 5, True)
+                        print(f"AI considers move ({row}, {col}) with score {score}")
+                        if score < bestScore:
+                            bestScore = score
+                            bestMove = childState
+                state = bestMove
+                if self.Win(state):
+                    state.Print()
                     print("AI wins!")
                     break
 
-            s.Print()
-            if self.isEndNode(s):
+            state.Print()
+            if self.isEndNode(state):
                 print("It's a draw!")
                 break
             turn += 1
