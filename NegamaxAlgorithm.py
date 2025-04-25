@@ -8,19 +8,22 @@ class State:
     def close(self):
         return copy.deepcopy(self)
 
+    def isFull(self):
+        return all(cell != 0 for cell in self.data)
+
     def Print(self):
-        sz = self.N
-        for i in range(sz):
-            for j in range(sz):
-                tmp = self.data[i * sz + j]
-                if tmp == 0:
-                    print('_', end='')
-                elif tmp == 1:
-                    print('o', end='')
+        boardSize = self.N
+        for row in range(boardSize):
+            for col in range(boardSize):
+                cellValue = self.data[row * boardSize + col]
+                if cellValue == 0:
+                    print('_', end=' ')
+                elif cellValue == 1:
+                    print('o', end=' ')
                 else:
-                    print('x', end='')
+                    print('x', end=' ')
             print()
-        print("==========")
+        print("=" * (boardSize * 2))
 
 class Operator:
     def __init__(self, x=0, y=0):
