@@ -7,7 +7,7 @@ class State:
 
     def close(self):
         return copy.deepcopy(self)
-
+    
     def isFull(self):
         return all(cell != 0 for cell in self.data)
 
@@ -30,32 +30,32 @@ class Operator:
         self.x = x
         self.y = y
 
-    def Move(self, s):
-        sz = s.N
-        x = self.x
-        y = self.y
-        if x < 0 or x >= sz or y < 0 or y >= sz:
+    def Move(self, state):
+        boardSize = state.N
+        row = self.x
+        col = self.y
+        if row < 0 or row >= boardSize or col < 0 or col >= boardSize:
             return None
-        if s.data[x * sz + y] != 0:
+        if state.data[row * boardSize + col] != 0:
             return None
-        res = sum(1 for value in s.data if value != 0)
-        sn = s.close()
-        sn.data[x * sz + y] = 1 if res % 2 == 0 else 2
-        return sn
+        filledCells = sum(1 for value in state.data if value != 0)
+        newState = state.close()
+        newState.data[row * boardSize + col] = 1 if filledCells % 2 == 0 else 2
+        return newState
 
-    def isEndNode(self, s):
-        sz = s.N
-        data = s.data
-        for i in range(sz):
-            if data[i * sz + 0] != 0 and data[i * sz + 0] == data[i * sz + 1] == data[i * sz + 2]:
+    def isEndNode(self, state):
+        boardSize = state.N
+        boardData = state.data
+        for row in range(boardSize):
+            if boardData[row * boardSize + 0] != 0 and boardData[row * boardSize + 0] == boardData[row * boardSize + 1] == boardData[row * boardSize + 2]:
                 return True
-            if data[0 * sz + i] != 0 and data[0 * sz + i] == data[1 * sz + i] == data[2 * sz + i]:
+            if boardData[0 * boardSize + row] != 0 and boardData[0 * boardSize + row] == boardData[1 * boardSize + row] == boardData[2 * boardSize + row]:
                 return True
-        if data[0] != 0 and data[0] == data[4] == data[8]:
+        if boardData[0] != 0 and boardData[0] == boardData[4] == boardData[8]:
             return True
-        if data[2] != 0 and data[2] == data[4] == data[6]:
+        if boardData[2] != 0 and boardData[2] == boardData[4] == boardData[6]:
             return True
-        return all(v != 0 for v in data)
+        return all(cell != 0 for cell in boardData)
 
     def Win(self, s):
         if s.data is None:
