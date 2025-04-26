@@ -111,9 +111,9 @@ def findMoveNegaMaxAlphaBeta(gs, validMoves, depth, alpha, beta, turnMultiplier)
 def scoreBoard(gs):
     if gs.checkMate:
         if gs.whiteToMove:
-            return -CHECKMATE # bên đen thắng
+            return -CHECKMATE
         else:
-            return CHECKMATE # bên trắng thắng
+            return CHECKMATE
     score = 0
     for row in range(len(gs.board)):
         for col in range(len(gs.board[row])):

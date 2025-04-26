@@ -147,7 +147,7 @@ class Operator:
                         childState = Operator(row, col).Move(state)
                         if childState is None:
                             continue
-                        score = self.Minimax(childState, 5, True)
+                        score = self.Minimax(childState, 10, True)
                         print(f"AI considers move ({row}, {col}) with score {score}")
                         if score < bestScore:
                             bestScore = score
