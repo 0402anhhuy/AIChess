@@ -40,8 +40,8 @@ def draw_buttons(buttons, mouse_pos):
         button.changeColor(mouse_pos)
         button.update(SCREEN)
 
-# Menu chơi game
-def play_menu():
+# Hàm tạo menu chính cho game
+def playMenu():
     while True:
         PLAY_MOUSE_POS = pygame.mouse.get_pos()
         SCREEN.fill("BLACK")
@@ -60,7 +60,7 @@ def play_menu():
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if BACK_BUTTON.checkForInput(PLAY_MOUSE_POS):
-                    main_menu()
+                    mainMenu()
                 elif PvE_BUTTON.checkForInput(PLAY_MOUSE_POS):
                     ChessMain.play(True)
                 elif PvP_BUTTON.checkForInput(PLAY_MOUSE_POS):
@@ -68,12 +68,14 @@ def play_menu():
 
         pygame.display.update()
 
-def draw_guide_text(text, center_y):
+# Hàm tạo bảng hướng dẫn cho trò chơi
+def drawGuideText(text, center_y):
     guide_text = get_font(80).render(text, True, "WHITE")
     guide_rect = guide_text.get_rect(center=(WIDTH / 2, HEIGHT * center_y))
     SCREEN.blit(guide_text, guide_rect)
 
-def guide_menu():
+# Hàm menu hướng dẫn cho trò chơi
+def guideMenu():
     while True:
         mouse_pos = pygame.mouse.get_pos()
 
@@ -86,9 +88,9 @@ def guide_menu():
         SCREEN.blit(guide_bg, guide_bg_rect)
 
         # Hiển thị các dòng hướng dẫn
-        draw_guide_text("Z: Undo", 0.26)
-        draw_guide_text("M: Menu", 0.39)
-        draw_guide_text("P: Pause", 0.52)
+        drawGuideText("Z: Undo", 0.26)
+        drawGuideText("M: Menu", 0.39)
+        drawGuideText("P: Pause", 0.52)
 
         # Nút Back
         back_button = create_button("BACK", (WIDTH / 2, HEIGHT * 0.8), 100, "White", "Green")
@@ -100,12 +102,12 @@ def guide_menu():
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if back_button.checkForInput(mouse_pos):
-                    main_menu()
+                    mainMenu()
 
         pygame.display.update()
 
-
-def pause_menu():
+# Hàm tạo menu khi tạm dừng trò chơi
+def pauseMenu():
     while True:
         mouse_pos = pygame.mouse.get_pos()
 
@@ -133,7 +135,7 @@ def pause_menu():
                 if buttons[2].checkForInput(mouse_pos):  # RESTART
                     return "RESTART"
                 if buttons[0].checkForInput(mouse_pos):  # HOME
-                    main_menu()
+                    mainMenu()
                 if buttons[3].checkForInput(mouse_pos):  # QUIT
                     pygame.quit()
                     sys.exit()
@@ -141,7 +143,8 @@ def pause_menu():
         pygame.display.update()
 
 
-def end_menu(end_text):
+# Hàm tạo menu khi kết thúc trò chơi
+def endMenu(end_text):
     while True:
         mouse_pos = pygame.mouse.get_pos()
 
@@ -168,7 +171,7 @@ def end_menu(end_text):
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if buttons[0].checkForInput(mouse_pos):  # HOME
-                    main_menu()
+                    mainMenu()
                 if buttons[1].checkForInput(mouse_pos):  # RESTART
                     ChessMain.play(False)
                 if buttons[2].checkForInput(mouse_pos):  # QUIT
@@ -177,7 +180,8 @@ def end_menu(end_text):
 
         pygame.display.update()
 
-def main_menu():
+# Hàm tạo menu chính choi trò chơi
+def mainMenu():
     while True:
         SCREEN.blit(BG, (0, 0))
         mouse_pos = pygame.mouse.get_pos()
@@ -202,9 +206,9 @@ def main_menu():
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if buttons[0].checkForInput(mouse_pos):  # PLAY
-                    play_menu()
+                    playMenu()
                 if buttons[1].checkForInput(mouse_pos):  # GUIDE
-                    guide_menu()
+                    guideMenu()
                 if buttons[2].checkForInput(mouse_pos):  # QUIT
                     pygame.quit()
                     sys.exit()

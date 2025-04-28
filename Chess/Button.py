@@ -18,24 +18,23 @@ class Button:
         self.text = self.font.render(self.text_input, True, self.base_color)
 
         if self.image is None:
-            self.image = self.text  # Nếu không có hình ảnh, sử dụng văn bản làm hình ảnh
+            self.image = self.text
 
         self.rect = self.image.get_rect(center=(self.x_pos, self.y_pos))
         self.text_rect = self.text.get_rect(center=(self.x_pos, self.y_pos))
 
     def update(self, screen):
         if self.image is not None:
-            screen.blit(self.image, self.rect)  # Vẽ hình ảnh (nếu có)
-        screen.blit(self.text, self.text_rect)  # Vẽ văn bản
+            screen.blit(self.image, self.rect)
+        screen.blit(self.text, self.text_rect)
 
+    # Kiểm tra xem chuột có nằm trong nút hay không
     def checkForInput(self, position):
-        """
-            Kiểm tra xem chuột có nằm trong button không
-        """
-        return self.rect.collidepoint(position)  # Dùng pygame.collidepoint() để đơn giản hóa
+        return self.rect.collidepoint(position)
 
+    # Thay đổi màu khi rê chuột lên nút
     def changeColor(self, position):
-        if self.rect.collidepoint(position):  # Nếu chuột hover lên button
+        if self.rect.collidepoint(position):
             self.text = self.font.render(self.text_input, True, self.hovering_color)
         else:
             self.text = self.font.render(self.text_input, True, self.base_color)
