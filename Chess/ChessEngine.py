@@ -272,10 +272,10 @@ class GameState():
     # Cập nhập quyền nhập thành - khi nước đi là nước đi của xe hoặc của vua        
     def updateCastleRight(self, move):
         """
-        Cập nhật quyền nhập thành (castle rights) sau khi thực hiện nước đi.
-        - Nếu vua di chuyển: mất cả 2 quyền nhập thành.
-        - Nếu xe di chuyển: mất quyền nhập thành tương ứng.
-        - Nếu xe bị bắt: mất quyền nhập thành tương ứng.
+            Cập nhật quyền nhập thành (castle rights) sau khi thực hiện nước đi.
+                - Nếu vua di chuyển: mất cả 2 quyền nhập thành.
+                - Nếu xe di chuyển: mất quyền nhập thành tương ứng.
+                - Nếu xe bị bắt: mất quyền nhập thành tương ứng.
         """
 
         # Kiểm tra xem quân di chuyển có phải và vua hay không
@@ -378,7 +378,7 @@ class GameState():
             # Đang là lượt của quân đen: kiểm tra xem vua Đen có bị tấn công hay không
             return self.squareUnderAttack(self.blackKingLocation[0], self.blackKingLocation[1])
 
-    # hàm này để kiểm tra  xem đổi thủ có thể tấn công ô vuông có toạ độ (r, c) không
+    # Hàm kiểm tra xem đổi thủ có thể tấn công ô vuông có toạ độ (r, c) không
     def squareUnderAttack(self, r, c):
         """
             - Kiểm tra xem ô (r, c) có đang bị đối thủ tấn công hay không.
