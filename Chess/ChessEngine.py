@@ -316,53 +316,66 @@ class GameState():
 
 
 
-    """
-    các nước đi cần phải xem xét có ảnh hưởng đến vua không
-    """
+    # Các nước đi cần phải xem xét có ảnh hưởng đến vua không
     def getValidMoves(self):
+        """
+            - Trả về danh sách tất cả các nước đi hợp lệ cho người chơi hiện tại (hoặc AI).
+            - Không thay đổi giao diện gọi hàm, trả danh sách nước đi của toàn bộ bàn cờ.
+        """
+
+        # 1. Lưu trạng thái ban đầu
         tempEnpassant = self.enpassantPossible
-        tempCastleRight = CastleRight(self.currentCastlingRight.wks, self.currentCastlingRight.bks, self.currentCastlingRight.wqs, self.currentCastlingRight.bqs)
-        # thuật toán để tìm các nước đi hợp lệ
-        # 1) tạo ra tất cả các nước đi hợp lệ bất kể có ảnh hưởng đến vua hay không
+        tempCastleRight = CastleRight(
+            self.currentCastlingRight.wks,
+            self.currentCastlingRight.bks,
+            self.currentCastlingRight.wqs,
+            self.currentCastlingRight.bqs
+        )
+
+        # 2. Sinh ra tất cả các nước đi không quan tâm vua bị chiếu hay không
         moves = self.getAllPossibleMoves()
 
-        # tạo riêng các nước nhập thành để tránh bị đệ quy vô hạn
+        # 3. Thêm các nước nhập thành (nếu có)
         if self.whiteToMove:
             self.getCastleMove(self.whiteKingLocation[0], self.whiteKingLocation[1], moves)
         else:
             self.getCastleMove(self.blackKingLocation[0], self.blackKingLocation[1], moves)
 
-        # 2) với mỗi nước đi, thực hiện chúng
-        for i in range(len(moves) - 1, -1, -1): # thực hiện một vòng for duyệt từ phần tử cuối đến phần tử đầu 
+        # 4. Lọc các nước đi khiến vua bị chiếu
+        for i in range(len(moves) - 1, -1, -1):
             self.makeMove(moves[i])
-        # 3) với mỗi nước đi được thực hiện, tạo ra tất cả các nước đi của đối thủ
-        # 4) với mỗi nước đi của đối thủ, kiểm tra xem họ có thể tấn công được vua của mình không
-            # sau khi gọi đến phương thức makeMove, lượt đi sẽ được đổi cho đối thủ
-            # vậy nên để có thể kiểm tra được các nước đi của đối thủ, ta cần đổi lại lượt chơi 1 lần nữa
-            self.whiteToMove = not self.whiteToMove 
+            self.whiteToMove = not self.whiteToMove
+
             if self.inCheck():
-                # 5) nếu có, nước đi trc đó là nước đi không hợp lệ
                 moves.remove(moves[i])
+
             self.whiteToMove = not self.whiteToMove
             self.undoMove()
 
+        # 5. Kiểm tra chiếu hết hoặc hòa
         if len(moves) == 0:
             if self.inCheck():
                 self.checkMate = True
             else:
                 self.staleMate = True
-        
 
+        # 6. Phục hồi trạng thái
         self.enpassantPossible = tempEnpassant
         self.currentCastlingRight = tempCastleRight
+
         return moves
     
-    # hàm này kiểm tra xem vua của người chơi có đang bị chiếu không
+    # Hàm kiểm tra xem vua có đang bị chiếu hay không
     def inCheck(self):
+        """
+        Kiểm tra xem vua của người chơi hiện tại có đang bị chiếu không.
+        Trả về True nếu vua bị đe dọa, False nếu an toàn.
+        """
         if self.whiteToMove:
-            # nếu đang là lượt của quân trắng, kiểm tra xem sau lượt đi dó quân vua có thể bị tấn công không
+            # Đang là lượt của Trắng: kiểm tra xem vua Trắng có bị tấn công hay không
             return self.squareUnderAttack(self.whiteKingLocation[0], self.whiteKingLocation[1])
         else:
+            # Đang là lượt của Đen: kiểm tra xem vua Đen có bị tấn công hay không
             return self.squareUnderAttack(self.blackKingLocation[0], self.blackKingLocation[1])
 
     # hàm này để kiểm tra  xem đổi thủ có thể tấn công ô vuông có toạ độ (r, c) không
