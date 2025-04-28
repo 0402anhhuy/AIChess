@@ -20,22 +20,22 @@ pygame.display.set_caption("Menu")
 BG = pygame.transform.scale(pygame.image.load("Chess/assets/menu/Background.png"), (WIDTH, HEIGHT))
 
 # Hàm tạo font
-def get_font(size):
+def getFont(size):
     return pygame.font.SysFont("Inter", size)
 
 # Hàm tạo nút
-def create_button(text, pos, font_size, base_color, hovering_color):
+def createButton(text, pos, font_size, base_color, hovering_color):
     return Button.Button(
         image=None,
         pos=pos,
         text_input=text,
-        font=get_font(font_size),
+        font=getFont(font_size),
         base_color=base_color,
         hovering_color=hovering_color,
     )
 
 # Hàm hiển thị tất cả các nút
-def draw_buttons(buttons, mouse_pos):
+def drawButtons(buttons, mouse_pos):
     for button in buttons:
         button.changeColor(mouse_pos)
         button.update(SCREEN)
@@ -47,12 +47,12 @@ def playMenu():
         SCREEN.fill("BLACK")
         SCREEN.blit(BG, (0, 0))
 
-        BACK_BUTTON = create_button("BACK", (WIDTH * 0.5, HEIGHT * 0.75), 100, "White", "Green")
-        PvP_BUTTON = create_button("PvP", (WIDTH * 0.5, HEIGHT * 0.25), 100, "#d7fcd4", "Blue")
-        PvE_BUTTON = create_button("PvE", (WIDTH * 0.5, HEIGHT * 0.5), 100, "#d7fcd4", "Yellow")
+        BACK_BUTTON = createButton("BACK", (WIDTH * 0.5, HEIGHT * 0.75), 100, "White", "Green")
+        PvP_BUTTON = createButton("PvP", (WIDTH * 0.5, HEIGHT * 0.25), 100, "#d7fcd4", "Blue")
+        PvE_BUTTON = createButton("PvE", (WIDTH * 0.5, HEIGHT * 0.5), 100, "#d7fcd4", "Yellow")
 
         buttons = [BACK_BUTTON, PvP_BUTTON, PvE_BUTTON]
-        draw_buttons(buttons, PLAY_MOUSE_POS)
+        drawButtons(buttons, PLAY_MOUSE_POS)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -70,7 +70,7 @@ def playMenu():
 
 # Hàm tạo bảng hướng dẫn cho trò chơi
 def drawGuideText(text, center_y):
-    guide_text = get_font(80).render(text, True, "WHITE")
+    guide_text = getFont(80).render(text, True, "WHITE")
     guide_rect = guide_text.get_rect(center=(WIDTH / 2, HEIGHT * center_y))
     SCREEN.blit(guide_text, guide_rect)
 
@@ -93,8 +93,8 @@ def guideMenu():
         drawGuideText("P: Pause", 0.52)
 
         # Nút Back
-        back_button = create_button("BACK", (WIDTH / 2, HEIGHT * 0.8), 100, "White", "Green")
-        draw_buttons([back_button], mouse_pos)
+        back_button = createButton("BACK", (WIDTH / 2, HEIGHT * 0.8), 100, "White", "Green")
+        drawButtons([back_button], mouse_pos)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -116,13 +116,13 @@ def pauseMenu():
 
         # Tạo các nút sử dụng hàm tái sử dụng
         buttons = [
-            create_button("HOME", (WIDTH / 2, HEIGHT * 0.2), 75, "#d7fcd4", "GREEN"),
-            create_button("RESUME", (WIDTH / 2, HEIGHT * 0.4), 75, "#d7fcd4", "WHITE"),
-            create_button("RESTART", (WIDTH / 2, HEIGHT * 0.6), 75, "#d7fcd4", "WHITE"),
-            create_button("QUIT", (WIDTH * 0.5, HEIGHT * 0.8), 75, "WHITE", "RED"),
+            createButton("HOME", (WIDTH / 2, HEIGHT * 0.2), 75, "#d7fcd4", "GREEN"),
+            createButton("RESUME", (WIDTH / 2, HEIGHT * 0.4), 75, "#d7fcd4", "WHITE"),
+            createButton("RESTART", (WIDTH / 2, HEIGHT * 0.6), 75, "#d7fcd4", "WHITE"),
+            createButton("QUIT", (WIDTH * 0.5, HEIGHT * 0.8), 75, "WHITE", "RED"),
         ]
 
-        draw_buttons(buttons, mouse_pos)
+        drawButtons(buttons, mouse_pos)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -152,18 +152,18 @@ def endMenu(end_text):
         SCREEN.blit(BG, (0, 0))
 
         # Hiển thị kết quả trận đấu
-        end_text_surface = get_font(75).render(end_text, True, "WHITE")
+        end_text_surface = getFont(75).render(end_text, True, "WHITE")
         end_text_rect = end_text_surface.get_rect(center=(WIDTH / 2, HEIGHT * 0.3))
         SCREEN.blit(end_text_surface, end_text_rect)
 
         # Tạo các nút
         buttons = [
-            create_button("HOME", (WIDTH / 2, HEIGHT * 0.45), 80, "#d7fcd4", "GREEN"),
-            create_button("RESTART", (WIDTH / 2, HEIGHT * 0.6), 80, "#d7fcd4", "WHITE"),
-            create_button("QUIT", (WIDTH * 0.5, HEIGHT * 0.75), 80, "#d7fcd4", "RED"),
+            createButton("HOME", (WIDTH / 2, HEIGHT * 0.45), 80, "#d7fcd4", "GREEN"),
+            createButton("RESTART", (WIDTH / 2, HEIGHT * 0.6), 80, "#d7fcd4", "WHITE"),
+            createButton("QUIT", (WIDTH * 0.5, HEIGHT * 0.75), 80, "#d7fcd4", "RED"),
         ]
 
-        draw_buttons(buttons, mouse_pos)
+        drawButtons(buttons, mouse_pos)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -187,18 +187,18 @@ def mainMenu():
         mouse_pos = pygame.mouse.get_pos()
 
         # Hiển thị tiêu đề "CHESS"
-        menu_text_surface = get_font(170).render("CHESS", True, "#b68f40")
+        menu_text_surface = getFont(170).render("CHESS", True, "#b68f40")
         menu_text_rect = menu_text_surface.get_rect(center=(WIDTH * 0.5, HEIGHT * 0.15))
         SCREEN.blit(menu_text_surface, menu_text_rect)
 
         # Tạo các nút
         buttons = [
-            create_button("PLAY", (WIDTH * 0.5, HEIGHT * 0.4), 120, "#d7fcd4", "White"),
-            create_button("GUIDE", (WIDTH * 0.5, HEIGHT * 0.6), 120, "#d7fcd4", "White"),
-            create_button("QUIT", (WIDTH * 0.5, HEIGHT * 0.8), 120, "#d7fcd4", "RED")
+            createButton("PLAY", (WIDTH * 0.5, HEIGHT * 0.4), 120, "#d7fcd4", "White"),
+            createButton("GUIDE", (WIDTH * 0.5, HEIGHT * 0.6), 120, "#d7fcd4", "White"),
+            createButton("QUIT", (WIDTH * 0.5, HEIGHT * 0.8), 120, "#d7fcd4", "RED")
         ]
 
-        draw_buttons(buttons, mouse_pos)
+        drawButtons(buttons, mouse_pos)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
