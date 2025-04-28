@@ -123,7 +123,7 @@ class GameState():
         # Kiểm tra chiếu hết
         self.checkMate = False
 
-        # Kiểm tra hết cờ
+        # Kiểm tra hết cờ (hòa cờ)
         self.staleMate = False
 
         # Toạ độ của ô có thể thực hiện bắt tốt qua đường
@@ -141,6 +141,7 @@ class GameState():
             self.currentCastlingRight.bqs
         )]
 
+    # Hàm để thực hiện nước đi
     def makeMove(self, move):
         """
             Thực hiện nước đi
@@ -167,7 +168,7 @@ class GameState():
         if move.isEnpassantMove:
             self.board[move.startRow][move.endCol] = '--'
 
-        # Update biến enpassantPossible()
+        # Cập nhật biến enpassantPossible()
         if move.pieceMoved[1] == 'P' and abs(move.startRow - move.endRow) == 2:
             self.enpassantPossible = ((move.startRow + move.endRow) // 2, move.startCol)
         else:
@@ -197,7 +198,7 @@ class GameState():
                     self.board[move.endRow][move.startCol - 4] = '--'  # Xoá vị trí cũ của xe
 
 
-        # Cập nhập quyền nhập thành - khi nước đi là nước đi của xe hoặc của vua
+        # Cập nhật quyền nhập thành - khi nước đi là nước đi của xe hoặc của vua
         self.updateCastleRight(move)
         self.castleRightLog.append(CastleRight(
             self.currentCastlingRight.wks,
@@ -206,91 +207,113 @@ class GameState():
             self.currentCastlingRight.bqs
         ))
 
+    # Hàm hoàn tác lại nước đi
     def undoMove(self):
-        # Kiểm tra xem có nước đi để undo hay không
-        if len(self.moveLog) == 0:
-            return
+        """
+            Hoàn tác nước đi gần nhất:
+                - Phục hồi bàn cờ
+                - Phục hồi lượt đi
+                - Phục hồi vị trí vua (nếu vua đã di chuyển)
+                - Phục hồi trạng thái en passant
+                - Phục hồi quyền nhập thành
+                - Phục hồi nước đi nhập thành (nếu có)
+                - Reset trạng thái chiếu hết/hòa
+        """
 
-        move = self.moveLog.pop()
+        # Không có nước đi nào để undo
+        if len(self.moveLog) == 0:
+            return  
+
+        # Lấy nước đi cuối cùng ra
+        move = self.moveLog.pop()  
+
+        # Phục hồi quân cờ
         self.board[move.startRow][move.startCol] = move.pieceMoved
         self.board[move.endRow][move.endCol] = move.pieceCaptured
+
+        # Đổi lại lượt đi
         self.whiteToMove = not self.whiteToMove
 
-        # Cập nhật lại vị trí vua
+        # Phục hồi vị trí vua (nếu vua di chuyển)
         if move.pieceMoved == 'wK':
             self.whiteKingLocation = (move.startRow, move.startCol)
         elif move.pieceMoved == 'bK':
             self.blackKingLocation = (move.startRow, move.startCol)
 
-        # Cập nhật lại trạng thái đi qua đường
+        # Hoàn tác en passant
         if move.isEnpassantMove:
-            self.board[move.endRow][move.endCol] = '--'
-            self.board[move.startRow][move.endCol] = move.pieceCaptured
+            self.board[move.endRow][move.endCol] = '--'  # Xóa quân tốt "ảo" do en passant
+            self.board[move.startRow][move.endCol] = move.pieceCaptured  # Đặt lại quân tốt bị bắt
 
-        # Kiểm tra trước khi pop để tránh lỗi rỗng danh sách
-        if len(self.enpassantPossibleLog) > 1:
-            self.enpassantPossibleLog.pop()
-            self.enpassantPossible = self.enpassantPossibleLog[-1]
+        # Phục hồi trạng thái en passant có thể
+        if len(self.enpassantPossibleLog) > 0:
+            self.enpassantPossible = self.enpassantPossibleLog.pop()
         else:
             self.enpassantPossible = None
 
-        # Khôi phục lại trạng thái nhập thành đúng cách
-        if len(self.castleRightLog) > 1:
-            self.castleRightLog.pop()
-        self.currentCastlingRight = self.castleRightLog[-1]  # Phải cập nhật ngay cả khi không pop
+        # Phục hồi quyền nhập thành
+        if len(self.castleRightLog) > 0:
+            self.currentCastlingRight = self.castleRightLog.pop()
 
-        # Hoàn tác nhập thành
+        # Hoàn tác nước nhập thành nếu có
         if move.isCastleMove:
-            if move.endCol - move.startCol == 2:  
-                # Nhập thành cánh vua (O-O)
-                self.board[move.endRow][move.startCol + 3] = self.board[move.endRow][move.startCol + 1]  # Đưa quân xe về vị trí cũ
-                self.board[move.endRow][move.startCol + 1] = '--'  # Xóa quân xe khỏi vị trí mới
-            else:  
-                # Nhập thành cánh hậu (O-O-O)
-                self.board[move.endRow][move.startCol - 4] = self.board[move.endRow][move.startCol - 1]  # Đưa quân xe về vị trí cũ
-                self.board[move.endRow][move.startCol - 1] = '--'  # Xóa quân xe khỏi vị trí mới
-            if len(self.castleRightLog) > 1:
-                self.castleRightLog.pop()
-            self.currentCastlingRight = self.castleRightLog[-1] 
+            if move.endCol - move.startCol == 2:  # Nhập thành cánh vua
+                self.board[move.endRow][move.startCol + 3] = self.board[move.endRow][move.startCol + 1]  # Xe quay về
+                self.board[move.endRow][move.startCol + 1] = '--'  # Xóa vị trí mới
+            elif move.endCol - move.startCol == -2:  # Nhập thành cánh hậu
+                self.board[move.endRow][move.startCol - 4] = self.board[move.endRow][move.startCol - 1]
+                self.board[move.endRow][move.startCol - 1] = '--'
 
+        # Reset cờ chiếu hết/hòa về False (vì undo về trước đó)
         self.checkMate = False
         self.staleMate = False
 
-     # Cập nhập quyền nhập thành - khi nước đi là nước đi của xe hoặc của vua        
+
+    # Cập nhập quyền nhập thành - khi nước đi là nước đi của xe hoặc của vua        
     def updateCastleRight(self, move):
-        # Kiểm tra xem quân cờ di chuyển có phải là quân xe hay quân vua hay không
+        """
+        Cập nhật quyền nhập thành (castle rights) sau khi thực hiện nước đi.
+        - Nếu vua di chuyển: mất cả 2 quyền nhập thành.
+        - Nếu xe di chuyển: mất quyền nhập thành tương ứng.
+        - Nếu xe bị bắt: mất quyền nhập thành tương ứng.
+        """
+
+        # Kiểm tra xem quân di chuyển có phải và vua hay không
         if move.pieceMoved == 'wK':
-            self.currentCastlingRight.wks = False
-            self.currentCastlingRight.wqs = False
+            self.currentCastlingRight.wks = False  # Mất quyền nhập thành cánh vua trắng
+            self.currentCastlingRight.wqs = False  # Mất quyền nhập thành cánh hậu trắng
         elif move.pieceMoved == 'bK':
-            self.currentCastlingRight.bks = False
-            self.currentCastlingRight.bqs = False
+            self.currentCastlingRight.bks = False  # Mất quyền nhập thành cánh vua đen
+            self.currentCastlingRight.bqs = False  # Mất quyền nhập thành cánh hậu đen
+
+        # Kiểm tra xem quân di chuyển có phải là xe hay không
         elif move.pieceMoved == 'wR':
             if move.startRow == 7:
                 if move.startCol == 0:
-                    self.currentCastlingRight.wqs = False
+                    self.currentCastlingRight.wqs = False  # Xe cánh hậu trắng di chuyển -> mất quyền
                 elif move.startCol == 7:
-                    self.currentCastlingRight.wks = False
+                    self.currentCastlingRight.wks = False  # Xe cánh vua trắng di chuyển -> mất quyền
         elif move.pieceMoved == 'bR':
             if move.startRow == 0:
                 if move.startCol == 0:
-                    self.currentCastlingRight.bqs = False
+                    self.currentCastlingRight.bqs = False  # Xe cánh hậu đen di chuyển -> mất quyền
                 elif move.startCol == 7:
-                    self.currentCastlingRight.bks = False
+                    self.currentCastlingRight.bks = False  # Xe cánh vua đen di chuyển -> mất quyền
 
-        # Nếu quân bị bắt là quân xe
+        # Kiểm tra xem quân bị bắt có phải là xe hay không
         if move.pieceCaptured == 'wR':
             if move.endRow == 7:
                 if move.endCol == 0:
-                    self.currentCastlingRight.wqs = False
+                    self.currentCastlingRight.wqs = False  # Xe cánh hậu trắng bị bắt -> mất quyền
                 elif move.endCol == 7:
-                    self.currentCastlingRight.wks = False
+                    self.currentCastlingRight.wks = False  # Xe cánh vua trắng bị bắt -> mất quyền
         elif move.pieceCaptured == 'bR':
             if move.endRow == 0:
                 if move.endCol == 0:
-                    self.currentCastlingRight.bqs = False
+                    self.currentCastlingRight.bqs = False  # Xe cánh hậu đen bị bắt -> mất quyền
                 elif move.endCol == 7:
-                    self.currentCastlingRight.bks = False
+                    self.currentCastlingRight.bks = False  # Xe cánh vua đen bị bắt -> mất quyền
+
 
 
     """
