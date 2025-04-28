@@ -368,25 +368,36 @@ class GameState():
     # Hàm kiểm tra xem vua có đang bị chiếu hay không
     def inCheck(self):
         """
-        Kiểm tra xem vua của người chơi hiện tại có đang bị chiếu không.
-        Trả về True nếu vua bị đe dọa, False nếu an toàn.
+            - Kiểm tra xem vua của người chơi hiện tại có đang bị chiếu không.
+            - Trả về True nếu vua bị đe dọa, False nếu an toàn.
         """
         if self.whiteToMove:
-            # Đang là lượt của Trắng: kiểm tra xem vua Trắng có bị tấn công hay không
+            # Đang là lượt của quân trắng: kiểm tra xem vua Trắng có bị tấn công hay không
             return self.squareUnderAttack(self.whiteKingLocation[0], self.whiteKingLocation[1])
         else:
-            # Đang là lượt của Đen: kiểm tra xem vua Đen có bị tấn công hay không
+            # Đang là lượt của quân đen: kiểm tra xem vua Đen có bị tấn công hay không
             return self.squareUnderAttack(self.blackKingLocation[0], self.blackKingLocation[1])
 
     # hàm này để kiểm tra  xem đổi thủ có thể tấn công ô vuông có toạ độ (r, c) không
     def squareUnderAttack(self, r, c):
-        self.whiteToMove = not self.whiteToMove # chuyển sang lượt đi của đối thủ 
-        oppMoves = self.getAllPossibleMoves() # lấy các lượt đi được của dối thủ
-        self.whiteToMove = not self.whiteToMove # chuyển lại về lượt đi của bản thân để không gặp lỗi
+        """
+            - Kiểm tra xem ô (r, c) có đang bị đối thủ tấn công hay không.
+            - Trả về True nếu có ít nhất 1 quân địch có thể đến ô đó, ngược lại False.
+        """
+        self.whiteToMove = not self.whiteToMove  # Chuyển lượt tạm thời sang đối thủ
+
+        oppMoves = self.getAllPossibleMoves()    # Sinh tất cả nước đi của đối thủ
+
+        self.whiteToMove = not self.whiteToMove  # Đổi lượt lại như cũ để tránh làm hỏng trạng thái
+
         for move in oppMoves:
-            if move.endRow == r and move.endCol == c: # có nghĩa là ô vuông đó có thể bị tấn công
+            # Nếu bất kỳ nước đi nào của đối thủ kết thúc tại (r, c), tức là ô đó bị tấn công
+            if move.endRow == r and move.endCol == c:
                 return True
+
+        # Nếu không quân nào nhắm vào ô (r, c), trả về False
         return False
+
                 
 
     """
