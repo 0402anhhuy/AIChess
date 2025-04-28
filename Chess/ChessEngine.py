@@ -45,6 +45,7 @@ class Move():
         # Xác định nước đi nhập thành
         self.isCastleMove = isCastleMove    
 
+        # Xác định quân có bị bắt hay không
         self.isCapture = self.pieceCaptured != '--'
         self.moveID = self.startRow * 1000 + self.startCol * 100 + self.endRow * 10 + self.endCol
 
@@ -53,12 +54,14 @@ class Move():
             return self.moveID == other.moveID
         return False
 
+    # Trả về ký hiệu cờ vua cho nước đi (VD: e2e4,...)
     def getChessNotation(self):
         return self.getRankFile(self.startRow, self.startCol) + self.getRankFile(self.endRow, self.endCol)
 
     def getRankFile(self, r, c):    
         return self.colsToFiles[c] + self.rowsToRanks[r]
 
+    # Hàm trả về ký hiệu cờ vua cho nước đi
     def __str__(self):
         if self.isCastleMove:
             return "O-O" if self.endCol == 6 else "O-O-O"
