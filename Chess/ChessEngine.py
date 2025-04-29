@@ -400,150 +400,249 @@ class GameState():
 
                 
 
-    """
-    các nước đi không cần xem xét
-    """
+    # Hàm tạo ra các nước đi cho mỗi quân cờ
     def getAllPossibleMoves(self):
-        moves = []
+        """
+            - Sinh ra tất cả các nước đi có thể cho người chơi hiện tại (chưa kiểm tra chiếu).
+        """
+        moves = []  # Khởi tạo danh sách lưu nước đi
+
+        # Duyệt từng ô trên bàn cờ 8x8
         for r in range(len(self.board)):
             for c in range(len(self.board[r])):
-                turn = self.board[r][c][0]
-                if (turn == 'w' and self.whiteToMove) or (turn == 'b' and not self.whiteToMove):
-                    piece = self.board[r][c][1]
-                    self.moveFunctions[piece](r, c, moves)
-        return moves
+                turn = self.board[r][c][0]  # Lấy màu quân cờ ('w' hoặc 'b')
 
+                # Chỉ xét quân cờ của bên đang đến lượt
+                if (turn == 'w' and self.whiteToMove) or (turn == 'b' and not self.whiteToMove):
+                    piece = self.board[r][c][1]  # Lấy loại quân cờ ('P', 'N', 'B', 'R', 'Q', 'K')
+
+                    # Gọi hàm sinh nước đi tương ứng với quân cờ
+                    self.moveFunctions[piece](r, c, moves)
+
+        return moves  # Trả về danh sách các nước đi
+
+    # Hàm thực hiện nước đi cho quân Tốt
     def getPawnMoves(self, r, c, moves):
+        """
+            - Sinh tất cả các nước đi hợp lệ cho quân Tốt (Pawn) tại vị trí (r, c).
+            - Bao gồm đi thẳng, bắt chéo, đi 2 bước đầu tiên và bắt en passant.
+        """
         if self.whiteToMove:
-            if self.board[r - 1][c] == "--":
+            # ĐI THẲNG: Tốt trắng đi lên phía trên (giảm hàng)
+            if self.board[r - 1][c] == "--":  # Ô phía trước trống
                 moves.append(Move((r, c), (r - 1, c), self.board))
+
+                # Nếu tốt đang ở hàng 6 (vị trí ban đầu) và ô phía trước 2 ô trống
                 if r == 6 and self.board[r - 2][c] == "--":
                     moves.append(Move((r, c), (r - 2, c), self.board))
+
+            # BẮT TRÁI
             if c - 1 >= 0:
-                if self.board[r - 1][c - 1][0] == 'b': # có quân của kẻ thù để bắt ở bên trái
+                if self.board[r - 1][c - 1][0] == 'b':  # Có quân đen bên trái
                     moves.append(Move((r, c), (r - 1, c - 1), self.board))
-                elif (r - 1, c - 1) == self.enpassantPossible:
+                elif (r - 1, c - 1) == self.enpassantPossible:  # En passant trái
                     moves.append(Move((r, c), (r - 1, c - 1), self.board, isEnpassantMove=True))
-            
+
+            # BẮT PHẢI
             if c + 1 <= 7:
-                if self.board[r - 1][c + 1][0] =='b': # có quân của kẻ thủ để bắt ở bên phải
+                if self.board[r - 1][c + 1][0] == 'b':  # Có quân đen bên phải
                     moves.append(Move((r, c), (r - 1, c + 1), self.board))
-                elif (r - 1, c + 1) == self.enpassantPossible:
-                    moves.append(Move((r, c), (r - 1, c + 1), self.board, isEnpassantMove=True)) 
+                elif (r - 1, c + 1) == self.enpassantPossible:  # En passant phải
+                    moves.append(Move((r, c), (r - 1, c + 1), self.board, isEnpassantMove=True))
 
         else:
-            if self.board[r + 1][c] == "--":
+            # ĐI THẲNG: Tốt đen đi xuống phía dưới (tăng hàng)
+            if self.board[r + 1][c] == "--":  # Ô phía trước trống
                 moves.append(Move((r, c), (r + 1, c), self.board))
+
+                # Nếu tốt đang ở hàng 1 và ô phía trước 2 ô trống
                 if r == 1 and self.board[r + 2][c] == "--":
                     moves.append(Move((r, c), (r + 2, c), self.board))
-            if c - 1 >= 0:
-                if self.board[r + 1][c - 1][0] == 'w': # có quân của kẻ thù để bắt ở bên trái
-                    moves.append(Move((r, c), (r + 1, c - 1), self.board))
-                elif (r + 1, c - 1) == self.enpassantPossible:
-                    moves.append(Move((r, c), (r + 1, c - 1), self.board, isEnpassantMove=True))
-            
-            if c + 1 <= 7:
-                if self.board[r + 1][c + 1][0] =='w': # có quân của kẻ thủ để bắt ở bên phải
-                    moves.append(Move((r, c), (r + 1, c + 1), self.board))
-                elif (r + 1, c + 1) == self.enpassantPossible:
-                    moves.append(Move((r, c), (r + 1, c + 1), self.board, isEnpassantMove=True))
 
+            # BẮT TRÁI
+            if c - 1 >= 0:
+                if self.board[r + 1][c - 1][0] == 'w':  # Có quân trắng bên trái
+                    moves.append(Move((r, c), (r + 1, c - 1), self.board))
+                elif (r + 1, c - 1) == self.enpassantPossible:  # En passant trái
+                    moves.append(Move((r, c), (r + 1, c - 1), self.board, isEnpassantMove=True))
+
+            # BẮT PHẢI
+            if c + 1 <= 7:
+                if self.board[r + 1][c + 1][0] == 'w':  # Có quân trắng bên phải
+                    moves.append(Move((r, c), (r + 1, c + 1), self.board))
+                elif (r + 1, c + 1) == self.enpassantPossible:  # En passant phải
+                    moves.append(Move((r, c), (r + 1, c + 1), self.board, isEnpassantMove=True))
+    
+    # Hàm thực hiện nước đi cho quân Xe
     def getRookMoves(self, r, c, moves):
-        directions = ((-1, 0), (0, -1), (1, 0), (0, 1)) #up, left, down, right
-        enemyColor = 'b' if self.whiteToMove else 'w'
+        """
+            - Sinh tất cả các nước đi hợp lệ cho quân Xe (Rook) tại vị trí (r, c).
+            - Xe đi theo 4 hướng: lên, xuống, trái, phải cho đến khi gặp vật cản.
+        """
+        directions = ((-1, 0), (0, -1), (1, 0), (0, 1))  # Hướng: lên, trái, xuống, phải
+        enemyColor = 'b' if self.whiteToMove else 'w'    # Màu của quân địch (người đối diện)
+
         for d in directions:
-            for i in range(1, 8): 
+            for i in range(1, 8):  # Rook có thể đi tối đa 7 ô theo mỗi hướng
                 endRow = r + d[0] * i
                 endCol = c + d[1] * i
+
+                # Kiểm tra xem ô đích có nằm trong bàn cờ không
                 if 0 <= endRow < 8 and 0 <= endCol < 8:
                     endPiece = self.board[endRow][endCol]
-                    if endPiece == '--':
-                        moves.append(Move((r, c), (endRow,endCol), self.board))
-                    elif endPiece[0] == enemyColor:
-                        moves.append(Move((r, c), (endRow,endCol), self.board))
+
+                    if endPiece == '--':  # Ô trống → có thể đi
+                        moves.append(Move((r, c), (endRow, endCol), self.board))
+
+                    elif endPiece[0] == enemyColor:  # Gặp quân địch → có thể bắt, rồi dừng
+                        moves.append(Move((r, c), (endRow, endCol), self.board))
                         break
-                    else:
+
+                    else:  # Gặp quân mình → không được đi, dừng lại
                         break
                 else:
-                    break
+                    break  # Ra ngoài bàn cờ → dừng
 
+    # Hàm thực hiện nước đi cho quân Mã
+    def getKnightMoves(self, r, c, moves):
+        """
+            - Sinh tất cả các nước đi hợp lệ cho quân Mã (Knight) tại vị trí (r, c).
+            - Mã di chuyển theo hình chữ L: 2 ô theo một hướng và 1 ô theo hướng vuông góc.
+        """
+        directions = ((-2, -1), (-2, 1), (-1, 2), (1, 2), (2, -1), (2, 1), (-1, -2), (1, -2))  # 8 hướng có thể đi
 
-    def getKnightMoves(self, r,c, moves):
-        directions = ((-2, -1), (-2, 1), (-1, 2), (1, 2), (2, -1), (2, 1), (-1, -2), (1, -2))
-        allyColor = 'w' if self.whiteToMove else 'b'
-        for i in directions:
-            endRow = r + i[0]
-            endCol = c + i[1]
-            if 0<= endRow < 8 and 0 <= endCol < 8:
+        allyColor = 'w' if self.whiteToMove else 'b'  # Màu quân mình (không được ăn)
+
+        for d in directions:
+            endRow = r + d[0]
+            endCol = c + d[1]
+
+            # Kiểm tra nước đi có nằm trong bàn cờ không
+            if 0 <= endRow < 8 and 0 <= endCol < 8:
                 endPiece = self.board[endRow][endCol]
+
+                # Nếu ô trống hoặc có quân địch → thêm nước đi
                 if endPiece[0] != allyColor:
                     moves.append(Move((r, c), (endRow, endCol), self.board))
 
+    # Hàm thực hiện nước đi cho quân Tượng
     def getBishopMoves(self, r, c, moves):
-        directions = ((-1, -1), (-1, 1), (1, 1), (1, -1))
-        enemyColor = 'b' if self.whiteToMove else 'w'
+        """
+            - Sinh tất cả các nước đi hợp lệ cho quân Tượng (Bishop) tại vị trí (r, c).
+            - Tượng đi chéo theo 4 hướng cho đến khi gặp vật cản.
+        """
+        directions = ((-1, -1), (-1, 1), (1, 1), (1, -1))  # 4 hướng đi chéo: trái trên, phải trên, phải dưới, trái dưới
+        enemyColor = 'b' if self.whiteToMove else 'w'      # Xác định màu quân địch
+
         for d in directions:
-            for i in range(1, 8):
+            for i in range(1, 8):  # Bishop có thể đi xa tối đa 7 ô theo mỗi hướng
                 endRow = r + d[0] * i
                 endCol = c + d[1] * i
+
+                # Kiểm tra xem ô đến có nằm trong bàn cờ không
                 if 0 <= endRow <= 7 and 0 <= endCol <= 7:
                     endPiece = self.board[endRow][endCol]
-                    if endPiece == '--':
+
+                    if endPiece == '--':  # Ô trống → có thể đi tiếp
                         moves.append(Move((r, c), (endRow, endCol), self.board))
-                    elif endPiece[0] == enemyColor:
+
+                    elif endPiece[0] == enemyColor:  # Gặp quân địch → có thể bắt rồi dừng
                         moves.append(Move((r, c), (endRow, endCol), self.board))
                         break
-                    else:
+
+                    else:  # Gặp quân ta → không đi tiếp được
                         break
                 else:
-                    break
+                    break  # Ra ngoài bàn cờ → dừng
 
-
+    # Hàm thực nhiện nước đi cho quân Hậu
     def getQueenMoves(self, r, c, moves):
-        self.getRookMoves(r, c, moves)
-        self.getBishopMoves(r, c, moves)
+        """
+            - Sinh tất cả các nước đi hợp lệ cho quân Hậu (Queen) tại vị trí (r, c).
+            - Hậu kết hợp cách đi của cả Xe (Rook) và Tượng (Bishop): đi ngang, dọc và chéo.
+        """
+        self.getRookMoves(r, c, moves)   # Gọi hàm của Rook để thêm các nước đi theo hàng và cột
+        self.getBishopMoves(r, c, moves) # Gọi hàm của Bishop để thêm các nước đi theo đường chéo
 
-    def getKingMoves(self,r,c,moves):
-        directions = ((-1, -1), (1, 1), (-1, 1), (1, -1), (-1, 0), (1, 0), (0, -1), (0, 1))
-        allyColor = 'w' if self.whiteToMove else 'b'
+    # Hàm thực hiện nước đi cho quân Vua
+    def getKingMoves(self, r, c, moves):
+        """
+            - Sinh tất cả các nước đi hợp lệ cho quân Vua (King) tại vị trí (r, c).
+            - Vua đi được 1 ô theo mọi hướng: ngang, dọc, chéo.
+        """
+        directions = ((-1, -1), (1, 1), (-1, 1), (1, -1),
+                    (-1, 0), (1, 0), (0, -1), (0, 1))  # 8 hướng xung quanh vua
+
+        allyColor = 'w' if self.whiteToMove else 'b'  # Xác định màu quân đồng minh
+
         for i in range(8):
             endRow = r + directions[i][0]
             endCol = c + directions[i][1]
+
+            # Kiểm tra xem ô đến có nằm trong bàn cờ không
             if 0 <= endRow < 8 and 0 <= endCol < 8:
                 endPiece = self.board[endRow][endCol]
+
+                # Nếu ô đích trống hoặc có quân địch → hợp lệ
                 if endPiece[0] != allyColor:
-                    moves.append(Move((r, c), (endRow,endCol), self.board))
-        
-        #self.getCastleMove(r,c,moves)
+                    moves.append(Move((r, c), (endRow, endCol), self.board))
 
-    # tạo tất cả các nước đi nhập thành hợp lệ với (r,c) là vị trí của vua và thêm chúng vào danh sách các nước đi hợp lệ
+        # Bỏ qua nhập thành tại đây, sẽ xử lý riêng trong getCastleMove()
+        self.getCastleMove(r, c, moves)
+
+    # Tạo tất cả các nước đi nhập thành hợp lệ với (r, c) là vị trí của vua và thêm chúng vào danh sách các nước đi hợp lệ
     def getCastleMove(self, r, c, moves):
-        if self.squareUnderAttack(r, c): # nếu vua đang bị chiếu
+        """
+            Kiểm tra các điều kiện nhập thành (castling) và thêm nước đi nhập thành hợp lệ nếu có:
+                - Vua không bị chiếu
+                - Các ô giữa vua và xe trống
+                - Các ô vua đi qua không bị tấn công
+                - Xe và vua chưa từng di chuyển (được kiểm soát qua quyền nhập thành)
+        """
+        if self.squareUnderAttack(r, c):  # Nếu vua đang bị chiếu → không được nhập thành
             return
-        if (self.whiteToMove and self.currentCastlingRight.wks) or (not self.whiteToMove and self.currentCastlingRight.bks):
-            self.getKingSideCastleMove(r, c, moves)
-        if (self.whiteToMove and self.currentCastlingRight.wqs) or (not self.whiteToMove and self.currentCastlingRight.bqs):
-            self.getQueenSideCastleMove(r, c, moves)
-        
-    # Thực hiện nước đi nhập thành ở hướng bên phải vua
-    def getKingSideCastleMove(self, r, c, moves):
-        if self.board[r][c + 1] == '--' and self.board[r][c + 2] == '--':
-            if not self.squareUnderAttack(r, c + 1) and not self.squareUnderAttack(r, c + 2): # nếu 2 ô bên phải vua không trong trạng thái có thể bị tấn công
-                moves.append(Move((r, c), (r, c + 2), self.board, isCastleMove = True))
 
-    # Thực hiện nước đi nhập thành ở phía bên quân hậu (bên trái của vua)
+        # Nhập thành cánh vua (bên phải)
+        if (self.whiteToMove and self.currentCastlingRight.wks) or \
+        (not self.whiteToMove and self.currentCastlingRight.bks):
+            self.getKingSideCastleMove(r, c, moves)
+
+        # Nhập thành cánh hậu (bên trái)
+        if (self.whiteToMove and self.currentCastlingRight.wqs) or \
+        (not self.whiteToMove and self.currentCastlingRight.bqs):
+            self.getQueenSideCastleMove(r, c, moves)
+
+
+    def getKingSideCastleMove(self, r, c, moves):
+        """
+            Thêm nước đi nhập thành cánh vua (O-O) nếu hợp lệ:
+                - 2 ô bên phải vua trống
+                - Các ô đó không bị tấn công
+                - Quyền nhập thành bên vua vẫn còn
+        """
+        if self.board[r][c + 1] == '--' and self.board[r][c + 2] == '--':  # Kiểm tra ô trống giữa vua và xe
+            if not self.squareUnderAttack(r, c + 1) and not self.squareUnderAttack(r, c + 2):
+                moves.append(Move((r, c), (r, c + 2), self.board, isCastleMove=True))
+
+
     def getQueenSideCastleMove(self, r, c, moves):
+        """
+            Thêm nước đi nhập thành cánh hậu (O-O-O) nếu hợp lệ:
+                - 3 ô bên trái vua trống
+                - 2 ô vua sẽ đi qua không bị tấn công
+                - Quyền nhập thành bên hậu vẫn còn
+        """
         if self.board[r][c - 1] == '--' and self.board[r][c - 2] == '--' and self.board[r][c - 3] == '--':
-            if not self.squareUnderAttack(r, c - 1) and not self.squareUnderAttack(r, c-2): # nếu 2 ô bên trái vua không trong trạng thái có thể bị tấn công
-                moves.append(Move((r, c), (r, c - 2), self.board, isCastleMove = True))
+            if not self.squareUnderAttack(r, c - 1) and not self.squareUnderAttack(r, c - 2):
+                moves.append(Move((r, c), (r, c - 2), self.board, isCastleMove=True))
 
 class CastleRight():
     def __init__(self, wks, bks, wqs, bqs):
         """
-            wks: nhập thành bên trắng ở hướng bên phải vua
-            bks: nhập thành bên đen ở hướng bên phải vua
-            wqs: nhập thành bên trắng ở hướng bên trái vua (quân hậu)
-            bqs: nhập thành bên đen ở hướng bên trái vua (quân hậu)
+            - wks: nhập thành bên trắng ở hướng bên phải vua
+            - bks: nhập thành bên đen ở hướng bên phải vua
+            - wqs: nhập thành bên trắng ở hướng bên trái vua (quân hậu)
+            - bqs: nhập thành bên đen ở hướng bên trái vua (quân hậu)
         """
         self.wks = wks
         self.bks = bks
