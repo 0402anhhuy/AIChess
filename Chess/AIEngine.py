@@ -214,32 +214,39 @@ def scoreBoard(gs):
 
 # Hàm sắp xếp thứ tự nước đi dựa trên điểm số
 def moveOrdering(gs, validMoves):
-    # Tạo một danh sách để lưu trữ điểm số cho mỗi nước đi
+    """
+        - Sắp xếp thứ tự nước đi dựa trên giá trị chiến lược để tối ưu hóa thuật toán alpha-beta.
+        - Ưu tiên: bắt quân mạnh, thăng cấp, nước đi trung tâm.
+    """
     moveScores = []
-    winningCapture = 0.8
-    losingCapture = 0.2
 
-    # Tính toán điểm số cho mỗi nước đi
     for move in validMoves:
-        gs.makeMove(move)
-        # Điểm số cơ bản dựa trên bảng điểm hiện tại
-        score = scoreBoard(gs)
-        gs.undoMove()
+        score = 0
 
-        # Thêm điểm thưởng hoặc phạt dựa trên các yếu tố khác
-        if move.isCapture:
-        
-            score += pieceScore[move.pieceCaptured[1]]
+        # Ưu tiên thăng cấp tốt (cực kỳ quan trọng)
         if move.isPawnPromotion:
-            # Thêm điểm nếu là nước thăng cấp
-            score += 1  # Giả sử thăng cấp được 1 điểm thưởng
+            score += 90  # Gần bằng hậu
+
+        # Ưu tiên bắt quân đắt giá hơn (MVV-LVA: most valuable victim)
+        if move.isCapture:
+            score += 10 * pieceScore[move.pieceCaptured[1]] - pieceScore[move.pieceMoved[1]]
+
+        # Ưu tiên đi gần trung tâm bàn cờ (4x4)
+        centerSquares = {(3, 3), (3, 4), (4, 3), (4, 4)}
+        if (move.endRow, move.endCol) in centerSquares:
+            score += 3
+
+        # Ưu tiên đi quân chưa di chuyển (gợi ý mở thế)
+        if (move.startRow, move.startCol) in [(1, i) for i in range(8)] + [(6, i) for i in range(8)]:
+            score += 1
 
         moveScores.append(score)
 
-    # Sắp xếp các nước đi dựa trên điểm số, từ cao xuống thấp
+    # Sắp xếp nước đi giảm dần theo điểm số
     sortedMoves = [move for _, move in sorted(zip(moveScores, validMoves), key=lambda pair: pair[0], reverse=True)]
 
     return sortedMoves
+
 
 # Hàm kiểm tra xem nước đi có an toàn hay không
 def isMoveSafe(gs, move):

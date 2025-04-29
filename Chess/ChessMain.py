@@ -193,7 +193,7 @@ def play(AI):
             start_time = time.time()
             while time.time() - start_time < TIME_WHILE_END:
                 pass
-            Menu.end_menu(end_text)
+            Menu.endMenu(end_text)
 
 # Các hàm vẽ bàn cờ, quân cờ, lịch sử nước đi, và hoạt ảnh
 def drawBoard(screen):
