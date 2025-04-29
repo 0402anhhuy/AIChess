@@ -4,27 +4,26 @@ import ChessMain
 import ChessEngine
 import Config
 
-import pygame
-import sys
-import Config
-import ChessMain
-import Button
-
 pygame.init()
 
-WIDTH = Config.Config.WIDTH + Config.Config.MOVE_LOG_W
-HEIGHT = Config.Config.HEIGHT
-SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Menu")
+# Kích thước màn hình
+WIDTH = Config.Config.WIDTH + Config.Config.MOVE_LOG_W  # Chiều rộng màn hình (bao gồm bảng ghi nước đi)
+HEIGHT = Config.Config.HEIGHT  # Chiều cao màn hình
+SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))  # Tạo cửa sổ hiển thị
+pygame.display.set_caption("Menu")  # Tiêu đề cửa sổ
 
+# Hình nền menu
 BG = pygame.transform.scale(pygame.image.load("Chess/assets/menu/Background.png"), (WIDTH, HEIGHT))
 
-# Hàm tạo font
+# Hàm tạo font chữ
 def getFont(size):
     return pygame.font.SysFont("Inter", size)
 
 # Hàm tạo nút
 def createButton(text, pos, font_size, base_color, hovering_color):
+    """
+        - Tạo một nút với văn bản, vị trí, màu sắc cơ bản và màu khi di chuột.
+    """
     return Button.Button(
         image=None,
         pos=pos,
@@ -36,51 +35,64 @@ def createButton(text, pos, font_size, base_color, hovering_color):
 
 # Hàm hiển thị tất cả các nút
 def drawButtons(buttons, mouse_pos):
+    """
+        - Hiển thị danh sách các nút trên màn hình và thay đổi màu khi di chuột.
+    """
     for button in buttons:
-        button.changeColor(mouse_pos)
-        button.update(SCREEN)
+        button.changeColor(mouse_pos)  # Thay đổi màu nếu chuột di qua nút
+        button.update(SCREEN)  # Cập nhật hiển thị nút
 
 # Hàm tạo menu chính cho game
 def playMenu():
+    """
+        - Menu chọn chế độ chơi: PvP (Player vs Player) hoặc PvE (Player vs AI).
+    """
     while True:
-        PLAY_MOUSE_POS = pygame.mouse.get_pos()
-        SCREEN.fill("BLACK")
-        SCREEN.blit(BG, (0, 0))
+        PLAY_MOUSE_POS = pygame.mouse.get_pos()  # Lấy vị trí chuột
+        SCREEN.fill("BLACK")  # Xóa màn hình
+        SCREEN.blit(BG, (0, 0))  # Hiển thị hình nền
 
+        # Tạo các nút
         BACK_BUTTON = createButton("BACK", (WIDTH * 0.5, HEIGHT * 0.75), 100, "White", "Green")
         PvP_BUTTON = createButton("PvP", (WIDTH * 0.5, HEIGHT * 0.25), 100, "#d7fcd4", "Blue")
         PvE_BUTTON = createButton("PvE", (WIDTH * 0.5, HEIGHT * 0.5), 100, "#d7fcd4", "Yellow")
 
         buttons = [BACK_BUTTON, PvP_BUTTON, PvE_BUTTON]
-        drawButtons(buttons, PLAY_MOUSE_POS)
+        drawButtons(buttons, PLAY_MOUSE_POS)  # Hiển thị các nút
 
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+            if event.type == pygame.QUIT:  # Thoát game nếu người dùng đóng cửa sổ
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if BACK_BUTTON.checkForInput(PLAY_MOUSE_POS):
+            if event.type == pygame.MOUSEBUTTONDOWN:  # Xử lý khi người dùng nhấn chuột
+                if BACK_BUTTON.checkForInput(PLAY_MOUSE_POS):  # Quay lại menu chính
                     mainMenu()
-                elif PvE_BUTTON.checkForInput(PLAY_MOUSE_POS):
+                elif PvE_BUTTON.checkForInput(PLAY_MOUSE_POS):  # Chơi với AI
                     ChessMain.play(True)
-                elif PvP_BUTTON.checkForInput(PLAY_MOUSE_POS):
+                elif PvP_BUTTON.checkForInput(PLAY_MOUSE_POS):  # Chơi với người
                     ChessMain.play(False)
 
-        pygame.display.update()
+        pygame.display.update()  # Cập nhật màn hình
 
-# Hàm tạo bảng hướng dẫn cho trò chơi
+# Hàm hiển thị văn bản hướng dẫn
 def drawGuideText(text, center_y):
-    guide_text = getFont(80).render(text, True, "WHITE")
-    guide_rect = guide_text.get_rect(center=(WIDTH / 2, HEIGHT * center_y))
-    SCREEN.blit(guide_text, guide_rect)
+    """
+        - Hiển thị một dòng văn bản hướng dẫn tại vị trí `center_y`.
+    """
+    guide_text = getFont(80).render(text, True, "WHITE")  # Tạo văn bản
+    guide_rect = guide_text.get_rect(center=(WIDTH / 2, HEIGHT * center_y))  # Đặt vị trí
+    SCREEN.blit(guide_text, guide_rect)  # Hiển thị văn bản
 
 # Hàm menu hướng dẫn cho trò chơi
 def guideMenu():
+    """
+        - Menu hiển thị hướng dẫn chơi game.
+    """
     while True:
-        mouse_pos = pygame.mouse.get_pos()
+        mouse_pos = pygame.mouse.get_pos()  # Lấy vị trí chuột
 
-        SCREEN.fill("BLACK")
-        SCREEN.blit(BG, (0, 0))
+        SCREEN.fill("BLACK")  # Xóa màn hình
+        SCREEN.blit(BG, (0, 0))  # Hiển thị hình nền
 
         # Hiển thị khung hướng dẫn
         guide_bg = pygame.image.load("Chess/assets/menu/Guide Rect.png")
@@ -97,24 +109,27 @@ def guideMenu():
         drawButtons([back_button], mouse_pos)
 
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+            if event.type == pygame.QUIT:  # Thoát game nếu người dùng đóng cửa sổ
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if back_button.checkForInput(mouse_pos):
+            if event.type == pygame.MOUSEBUTTONDOWN:  # Xử lý khi người dùng nhấn chuột
+                if back_button.checkForInput(mouse_pos):  # Quay lại menu chính
                     mainMenu()
 
-        pygame.display.update()
+        pygame.display.update()  # Cập nhật màn hình
 
 # Hàm tạo menu khi tạm dừng trò chơi
 def pauseMenu():
+    """
+        - Menu hiển thị khi trò chơi bị tạm dừng.
+    """
     while True:
-        mouse_pos = pygame.mouse.get_pos()
+        mouse_pos = pygame.mouse.get_pos()  # Lấy vị trí chuột
 
-        SCREEN.fill("BLACK")
-        SCREEN.blit(BG, (0, 0))
+        SCREEN.fill("BLACK")  # Xóa màn hình
+        SCREEN.blit(BG, (0, 0))  # Hiển thị hình nền
 
-        # Tạo các nút sử dụng hàm tái sử dụng
+        # Tạo các nút
         buttons = [
             createButton("HOME", (WIDTH / 2, HEIGHT * 0.2), 75, "#d7fcd4", "GREEN"),
             createButton("RESUME", (WIDTH / 2, HEIGHT * 0.4), 75, "#d7fcd4", "WHITE"),
@@ -122,34 +137,36 @@ def pauseMenu():
             createButton("QUIT", (WIDTH * 0.5, HEIGHT * 0.8), 75, "WHITE", "RED"),
         ]
 
-        drawButtons(buttons, mouse_pos)
+        drawButtons(buttons, mouse_pos)  # Hiển thị các nút
 
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+            if event.type == pygame.QUIT:  # Thoát game nếu người dùng đóng cửa sổ
                 pygame.quit()
                 sys.exit()
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if buttons[1].checkForInput(mouse_pos):  # RESUME
+            if event.type == pygame.MOUSEBUTTONDOWN:  # Xử lý khi người dùng nhấn chuột
+                if buttons[1].checkForInput(mouse_pos):  # Tiếp tục trò chơi
                     return "RESUME"
-                if buttons[2].checkForInput(mouse_pos):  # RESTART
+                if buttons[2].checkForInput(mouse_pos):  # Chơi lại
                     return "RESTART"
-                if buttons[0].checkForInput(mouse_pos):  # HOME
+                if buttons[0].checkForInput(mouse_pos):  # Quay lại menu chính
                     mainMenu()
-                if buttons[3].checkForInput(mouse_pos):  # QUIT
+                if buttons[3].checkForInput(mouse_pos):  # Thoát game
                     pygame.quit()
                     sys.exit()
 
-        pygame.display.update()
-
+        pygame.display.update()  # Cập nhật màn hình
 
 # Hàm tạo menu khi kết thúc trò chơi
 def endMenu(end_text):
+    """
+        - Menu hiển thị khi trò chơi kết thúc.
+    """
     while True:
-        mouse_pos = pygame.mouse.get_pos()
+        mouse_pos = pygame.mouse.get_pos()  # Lấy vị trí chuột
 
-        SCREEN.fill("BLACK")
-        SCREEN.blit(BG, (0, 0))
+        SCREEN.fill("BLACK")  # Xóa màn hình
+        SCREEN.blit(BG, (0, 0))  # Hiển thị hình nền
 
         # Hiển thị kết quả trận đấu
         end_text_surface = getFont(75).render(end_text, True, "WHITE")
@@ -163,28 +180,31 @@ def endMenu(end_text):
             createButton("QUIT", (WIDTH * 0.5, HEIGHT * 0.75), 80, "#d7fcd4", "RED"),
         ]
 
-        drawButtons(buttons, mouse_pos)
+        drawButtons(buttons, mouse_pos)  # Hiển thị các nút
 
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+            if event.type == pygame.QUIT:  # Thoát game nếu người dùng đóng cửa sổ
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if buttons[0].checkForInput(mouse_pos):  # HOME
+            if event.type == pygame.MOUSEBUTTONDOWN:  # Xử lý khi người dùng nhấn chuột
+                if buttons[0].checkForInput(mouse_pos):  # Quay lại menu chính
                     mainMenu()
-                if buttons[1].checkForInput(mouse_pos):  # RESTART
+                if buttons[1].checkForInput(mouse_pos):  # Chơi lại
                     ChessMain.play(False)
-                if buttons[2].checkForInput(mouse_pos):  # QUIT
+                if buttons[2].checkForInput(mouse_pos):  # Thoát game
                     pygame.quit()
                     sys.exit()
 
-        pygame.display.update()
+        pygame.display.update()  # Cập nhật màn hình
 
-# Hàm tạo menu chính choi trò chơi
+# Hàm tạo menu chính cho trò chơi
 def mainMenu():
+    """
+        - Menu chính của trò chơi.
+    """
     while True:
-        SCREEN.blit(BG, (0, 0))
-        mouse_pos = pygame.mouse.get_pos()
+        SCREEN.blit(BG, (0, 0))  # Hiển thị hình nền
+        mouse_pos = pygame.mouse.get_pos()  # Lấy vị trí chuột
 
         # Hiển thị tiêu đề "CHESS"
         menu_text_surface = getFont(170).render("CHESS", True, "#b68f40")
@@ -198,19 +218,19 @@ def mainMenu():
             createButton("QUIT", (WIDTH * 0.5, HEIGHT * 0.8), 120, "#d7fcd4", "RED")
         ]
 
-        drawButtons(buttons, mouse_pos)
+        drawButtons(buttons, mouse_pos)  # Hiển thị các nút
 
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+            if event.type == pygame.QUIT:  # Thoát game nếu người dùng đóng cửa sổ
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if buttons[0].checkForInput(mouse_pos):  # PLAY
+            if event.type == pygame.MOUSEBUTTONDOWN:  # Xử lý khi người dùng nhấn chuột
+                if buttons[0].checkForInput(mouse_pos):  # Chơi game
                     playMenu()
-                if buttons[1].checkForInput(mouse_pos):  # GUIDE
+                if buttons[1].checkForInput(mouse_pos):  # Hướng dẫn
                     guideMenu()
-                if buttons[2].checkForInput(mouse_pos):  # QUIT
+                if buttons[2].checkForInput(mouse_pos):  # Thoát game
                     pygame.quit()
                     sys.exit()
 
-        pygame.display.update()
+        pygame.display.update()  # Cập nhật màn hình
