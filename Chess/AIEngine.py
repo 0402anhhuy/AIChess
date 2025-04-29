@@ -87,7 +87,7 @@ piecePositionScores = {
 # Hằng số điểm cho chiếu hết và hòa
 CHECKMATE = 1000
 STALEMATE = 0
-DEPTH = 2  # Mức tối đa tìm kiếm trong Minimax hoặc AI
+DEPTH = 2  # Mặc định, sẽ điều chỉnh linh hoạt khi tìm nước đi
 
 # Hàm thực hiện tìm nước đi ngẫu nhiên trong danh sách validMoves
 def findRandomMove(validMoves):
@@ -119,11 +119,18 @@ def findBestMove(gs, validMoves):
     nextMove = None  # Reset trạng thái nước tốt nhất
     validMoves = moveOrdering(gs, validMoves)  # Sắp xếp nước đi (gợi ý để pruning tốt hơn)
 
+    # Tăng độ sâu tìm kiếm khi số lượng nước đi ít hơn (cuối ván)
+    currentDepth = DEPTH
+    if len(validMoves) <= 10:
+        currentDepth = 3
+    if len(validMoves) <= 5:
+        currentDepth = 4
+
     # Gọi thuật toán NegaMax với Alpha-Beta pruning
     findMoveNegaMaxAlphaBeta(
         gs,
         validMoves,
-        DEPTH,               # Chiều sâu tìm kiếm
+        currentDepth,               # Chiều sâu tìm kiếm
         -CHECKMATE,          # Alpha khởi đầu
         CHECKMATE,           # Beta khởi đầu
         1 if gs.whiteToMove else -1  # Màu đang đi (trắng: 1, đen: -1)
@@ -162,11 +169,10 @@ def findMoveNegaMaxAlphaBeta(gs, validMoves, depth, alpha, beta, turnMultiplier)
         # Nếu điểm vừa tìm được lớn hơn điểm lớn nhất hiện tại thì cập nhật
         if score > maxScore:
             maxScore = score
-            if depth == DEPTH:
+            if depth == DEPTH or depth >= 3:
                 nextMove = move  # Ghi nhận nước đi tốt nhất ở mức gốc (top-level)
 
         alpha = max(alpha, maxScore)  # Cập nhật alpha
-
         if alpha >= beta:  # Cắt tỉa nếu không còn hy vọng tìm điểm tốt hơn
             break
 
@@ -216,29 +222,57 @@ def scoreBoard(gs):
 def moveOrdering(gs, validMoves):
     """
         - Sắp xếp thứ tự nước đi dựa trên giá trị chiến lược để tối ưu hóa thuật toán alpha-beta.
-        - Ưu tiên: bắt quân mạnh, thăng cấp, nước đi trung tâm.
+        - Ưu tiên: bắt quân mạnh, thăng cấp, nước đi trung tâm, nước đi chiếu vua, ép vua vào góc, phòng thủ khỏi chiếu.
     """
     moveScores = []
 
     for move in validMoves:
         score = 0
 
-        # Ưu tiên thăng cấp tốt (cực kỳ quan trọng)
+        # Ưu tiên thăng cấp tốt
         if move.isPawnPromotion:
-            score += 90  # Gần bằng hậu
+            score += 90
 
-        # Ưu tiên bắt quân đắt giá hơn (MVV-LVA: most valuable victim)
+        # Ưu tiên bắt quân đắt giá hơn (MVV-LVA)
         if move.isCapture:
             score += 10 * pieceScore[move.pieceCaptured[1]] - pieceScore[move.pieceMoved[1]]
 
-        # Ưu tiên đi gần trung tâm bàn cờ (4x4)
+        # Ưu tiên đi gần trung tâm
         centerSquares = {(3, 3), (3, 4), (4, 3), (4, 4)}
         if (move.endRow, move.endCol) in centerSquares:
             score += 3
 
-        # Ưu tiên đi quân chưa di chuyển (gợi ý mở thế)
+        # Ưu tiên mở quân hàng đầu
         if (move.startRow, move.startCol) in [(1, i) for i in range(8)] + [(6, i) for i in range(8)]:
             score += 1
+
+        # Giả lập nước đi để đánh giá thêm
+        wasInCheck = gs.inCheck()  # Kiểm tra trước khi đi có bị chiếu không
+        gs.makeMove(move)
+
+        # Nếu sau khi đi, đối phương bị chiếu → tăng điểm
+        if gs.inCheck():
+            score += 20
+
+        # Nếu trước khi đi bị chiếu và nước đi giúp thoát chiếu → tăng điểm phòng thủ
+        if wasInCheck and not gs.inCheck():
+            # Nếu không phải chạy vua mà là chặn/bắt thì càng tốt
+            if move.pieceMoved[1] != 'K':
+                score += 12
+            else:
+                score += 5  # Nếu là chạy vua, cộng ít hơn
+
+        # Chiến thuật ép vua về góc nếu đối thủ chỉ còn vua
+        enemyKingOnly = all(
+            piece == '--' or piece[1] == 'K' or (piece[0] == ('w' if gs.whiteToMove else 'b'))
+            for row in gs.board for piece in row
+        )
+        if enemyKingOnly:
+            oppKingPos = gs.blackKingLocation if gs.whiteToMove else gs.whiteKingLocation
+            if oppKingPos[0] in {0, 7} and oppKingPos[1] in {0, 7}:
+                score += 5  # Nếu vua đối thủ ở góc, tăng điểm
+
+        gs.undoMove()
 
         moveScores.append(score)
 
