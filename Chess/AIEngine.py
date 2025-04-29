@@ -89,6 +89,7 @@ CHECKMATE = 1000
 STALEMATE = 0
 DEPTH = 2  # Mức tối đa tìm kiếm trong Minimax hoặc AI
 
+# Hàm thực hiện tìm nước đi ngẫu nhiên trong danh sách validMoves
 def findRandomMove(validMoves):
     """
         - Trả về một nước đi ngẫu nhiên trong danh sách validMoves.
@@ -96,7 +97,7 @@ def findRandomMove(validMoves):
     """
     return validMoves[random.randint(0, len(validMoves) - 1)]
 
-
+# Hàm tìm nước đi tốt nhất cho bot chơi cờ vua
 def findBestMove(gs, validMoves):
     """
         - Tìm nước đi tốt nhất dựa theo thuật toán NegaMax + AlphaBeta pruning.
@@ -131,62 +132,87 @@ def findBestMove(gs, validMoves):
     gs.currentCastlingRight = tempCastleRight  # Khôi phục lại quyền nhập thành
     return nextMove  # Trả về nước đi tốt nhất tìm được
     
-
+# Hàm tìm nước đi tốt nhất bằng thuật toán NegaMax với Alpha-Beta pruning
 def findMoveNegaMaxAlphaBeta(gs, validMoves, depth, alpha, beta, turnMultiplier):
+    # Sử dụng thuật toán NegaMax với cắt tỉa Alpha-Beta để tìm nước đi tốt nhất
     global nextMove
 
-    boardKey = str(gs.board)
-    if boardKey in transpositionTable and transpositionTable[boardKey][0] >= depth:
-        return transpositionTable[boardKey][1]
+    boardKey = str(gs.board)  # Dùng string biểu diễn bàn cờ làm khóa lưu trong bảng ghi nhớ
 
+    # Dùng bảng ghi nhớ để tránh tính lại nếu đã duyệt trạng thái này với độ sâu lớn hơn hoặc bằng
+    if boardKey in transpositionTable and transpositionTable[boardKey][0] >= depth:
+        return transpositionTable[boardKey][1]  # Trả lại điểm đã tính trước
+
+    # Trường hợp cơ sở: nếu độ sâu bằng 0 thì đánh giá bàn cờ hiện tại
     if depth == 0:
         return turnMultiplier * scoreBoard(gs)
 
-    maxScore = -CHECKMATE
-    for move in validMoves:
-        gs.makeMove(move)
-        nextMoves = gs.getValidMoves()
-        nextMoves = moveOrdering(gs, nextMoves)
-        score = -findMoveNegaMaxAlphaBeta(gs, nextMoves, depth - 1, -beta, -alpha, -turnMultiplier)
-        gs.undoMove()
+    maxScore = -CHECKMATE  # Khởi tạo điểm lớn nhất với giá trị âm vô cùng
 
+    for move in validMoves:
+        gs.makeMove(move)  # Thực hiện nước đi giả lập
+        nextMoves = gs.getValidMoves()  # Lấy các nước đi tiếp theo của đối thủ
+        nextMoves = moveOrdering(gs, nextMoves)  # Sắp xếp thứ tự nước đi để tối ưu hóa
+
+        # Gọi đệ quy NegaMax với lượt của đối thủ và chiều sâu giảm 1
+        score = -findMoveNegaMaxAlphaBeta(gs, nextMoves, depth - 1, -beta, -alpha, -turnMultiplier)
+
+        gs.undoMove()  # Hoàn tác nước đi giả lập
+
+        # Nếu điểm vừa tìm được lớn hơn điểm lớn nhất hiện tại thì cập nhật
         if score > maxScore:
             maxScore = score
             if depth == DEPTH:
-                nextMove = move
+                nextMove = move  # Ghi nhận nước đi tốt nhất ở mức gốc (top-level)
 
-        alpha = max(alpha, maxScore)
-        if alpha >= beta:
+        alpha = max(alpha, maxScore)  # Cập nhật alpha
+
+        if alpha >= beta:  # Cắt tỉa nếu không còn hy vọng tìm điểm tốt hơn
             break
 
+    # Lưu trạng thái vào bảng ghi nhớ để tái sử dụng sau này
     transpositionTable[boardKey] = (depth, maxScore)
 
-    return maxScore
+    return maxScore  # Trả về điểm đánh giá tốt nhất tại node này
 
-
+# Hàm đánh giá bàn cờ hiện tại
 def scoreBoard(gs):
+    """
+        Đánh giá trạng thái bàn cờ hiện tại:
+            - Dựa vào điểm quân cờ (pieceScore)
+            - Dựa vào vị trí quân cờ (piecePositionScores)
+            - Nếu chiếu hết thì trả về điểm tuyệt đối (CHECKMATE)
+    """
     if gs.checkMate:
         if gs.whiteToMove:
-            return -CHECKMATE
+            return -CHECKMATE  # Trắng bị chiếu hết => thua
         else:
-            return CHECKMATE
-    score = 0
+            return CHECKMATE   # Đen bị chiếu hết => thua
+
+    score = 0  # Khởi tạo tổng điểm
+
+    # Duyệt toàn bộ bàn cờ
     for row in range(len(gs.board)):
         for col in range(len(gs.board[row])):
             square = gs.board[row][col]
             if square != '--':
-                piecePositionScore = 0
-                if square[1] != "K":
-                    if square[1] == 'P':
+                piecePositionScore = 0  # Điểm vị trí ban đầu
+
+                if square[1] != "K":  # Không tính điểm vị trí cho vua
+                    if square[1] == 'P':  # Nếu là tốt thì cần phân biệt trắng / đen
                         piecePositionScore = piecePositionScores[square][row][col]
-                    else:    
+                    else:
                         piecePositionScore = piecePositionScores[square[1]][row][col]
+
+                # Cộng hoặc trừ điểm tuỳ theo màu quân cờ
                 if square[0] == 'w':
                     score += pieceScore[square[1]] + piecePositionScore * 0.1
                 elif square[0] == 'b':
                     score -= (pieceScore[square[1]] + piecePositionScore * 0.1)
-    return score
 
+    return score  # Trả về điểm đánh giá cuối cùng
+
+# Hàm sắp xếp thứ tự nước đi dựa trên điểm số
 def moveOrdering(gs, validMoves):
     # Tạo một danh sách để lưu trữ điểm số cho mỗi nước đi
     moveScores = []
@@ -215,9 +241,10 @@ def moveOrdering(gs, validMoves):
 
     return sortedMoves
 
+# Hàm kiểm tra xem nước đi có an toàn hay không
 def isMoveSafe(gs, move):
     """
-    Kiểm tra xem sau khi thực hiện nước đi, quân cờ có an toàn không.
+        - Kiểm tra xem sau khi thực hiện nước đi, quân cờ có an toàn không.
     """
     gs.makeMove(move)  # Thực hiện nước đi
     opponent_moves = gs.getValidMoves()  # Lấy tất cả nước đi hợp lệ của đối thủ
