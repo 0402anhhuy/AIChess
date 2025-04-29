@@ -587,9 +587,6 @@ class GameState():
                 if endPiece[0] != allyColor:
                     moves.append(Move((r, c), (endRow, endCol), self.board))
 
-        # Bỏ qua nhập thành tại đây, sẽ xử lý riêng trong getCastleMove()
-        self.getCastleMove(r, c, moves)
-
     # Tạo tất cả các nước đi nhập thành hợp lệ với (r, c) là vị trí của vua và thêm chúng vào danh sách các nước đi hợp lệ
     def getCastleMove(self, r, c, moves):
         """

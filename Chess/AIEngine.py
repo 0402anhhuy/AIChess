@@ -1,9 +1,20 @@
 import random
-import ChessEngine as CE
+import ChessEngine as CE  # Import mô-đun logic cờ vua chứa GameState, Move, v.v.
 
-pieceScore ={"K": 0, "Q": 10, "R": 5, "B": 3, "N": 3, "P": 1}
+# Điểm cơ bản cho từng loại quân cờ
+pieceScore = {
+    "K": 0,  # Vua không cho điểm (chiếu hết mới quan trọng)
+    "Q": 10, # Hậu
+    "R": 5,  # Xe
+    "B": 3,  # Tượng
+    "N": 3,  # Mã
+    "P": 1   # Tốt
+}
+
+# Bảng bố trợ ghi nhớ trạng thái đã được duyệt (dùng cho AI)
 transpositionTable = {}
 
+# Điểm vị trí của Mã trên bàn cờ (càng vào trung tâm càng tốt)
 knightScores = [[1, 1, 1, 1, 1, 1, 1, 1],
                 [1, 2, 2, 2, 2, 2, 2, 1],
                 [1, 2, 3, 3, 3, 3, 2, 1],
@@ -13,6 +24,7 @@ knightScores = [[1, 1, 1, 1, 1, 1, 1, 1],
                 [1, 2, 2, 2, 2, 2, 2, 1],
                 [1, 1, 1, 1, 1, 1, 1, 1]]
 
+# Điểm vị trí của Tượng
 bishopScores = [[4, 3, 2, 1, 1, 2, 3, 4],
                 [3, 4, 3, 2, 2, 3, 4, 3],
                 [2, 3, 4, 3, 3, 4, 3, 2],
@@ -22,59 +34,103 @@ bishopScores = [[4, 3, 2, 1, 1, 2, 3, 4],
                 [3, 4, 3, 2, 2, 3, 4, 3],
                 [4, 3, 2, 1, 1, 2, 3, 4]]
 
-queenScores =  [[1, 1, 1, 3, 1, 1, 1, 1],
-                [1, 2, 3, 3, 3, 1, 1, 1],
-                [1, 4, 3, 3, 3, 4, 2, 1],
-                [1, 2, 3, 3, 3, 2, 2, 1],
-                [1, 2, 3, 3, 3, 2, 2, 1],
-                [1, 4, 3, 3, 3, 4, 2, 1],
-                [1, 1, 2, 3, 3, 1, 1, 1],
-                [1, 1, 1, 3, 1, 1, 1, 1]]
+# Điểm vị trí của Hậu
+queenScores = [[1, 1, 1, 3, 1, 1, 1, 1],
+               [1, 2, 3, 3, 3, 1, 1, 1],
+               [1, 4, 3, 3, 3, 4, 2, 1],
+               [1, 2, 3, 3, 3, 2, 2, 1],
+               [1, 2, 3, 3, 3, 2, 2, 1],
+               [1, 4, 3, 3, 3, 4, 2, 1],
+               [1, 1, 2, 3, 3, 1, 1, 1],
+               [1, 1, 1, 3, 1, 1, 1, 1]]
 
-rookScores =   [[4, 3, 4, 4, 4, 4, 3, 4],
-                [4, 4, 4, 4, 4, 4, 4, 4],
-                [1, 1, 2, 3, 3, 2, 1, 1],
-                [1, 2, 3, 4, 4, 3, 2, 1],
-                [1, 2, 3, 4, 4, 3, 2, 1],
-                [1, 1, 2, 3, 3, 2, 1, 1],
-                [4, 4, 4, 4, 4, 4, 4, 4],
-                [4, 3, 4, 4, 4, 4, 3, 4]]
+# Điểm vị trí của Xe
+rookScores = [[4, 3, 4, 4, 4, 4, 3, 4],
+              [4, 4, 4, 4, 4, 4, 4, 4],
+              [1, 1, 2, 3, 3, 2, 1, 1],
+              [1, 2, 3, 4, 4, 3, 2, 1],
+              [1, 2, 3, 4, 4, 3, 2, 1],
+              [1, 1, 2, 3, 3, 2, 1, 1],
+              [4, 4, 4, 4, 4, 4, 4, 4],
+              [4, 3, 4, 4, 4, 4, 3, 4]]
 
-whitePawnScores = [ [8, 8, 8, 8, 8, 8, 8, 8],
-                    [8, 8, 8, 8, 8, 8, 8, 8],
-                    [5, 6, 6, 7, 7, 6, 6, 5],
-                    [2, 3, 3, 5, 5, 3, 3, 2],
-                    [1, 2, 3, 4, 4, 3, 2, 1],
-                    [1, 1, 2, 3, 3, 2, 1, 1],
-                    [1, 1, 1, 0, 0, 1, 1, 1],
-                    [0, 0, 0, 0, 0, 0, 0, 0]]
+# Điểm vị trí của Tốt trắng
+whitePawnScores = [[8, 8, 8, 8, 8, 8, 8, 8],
+                   [8, 8, 8, 8, 8, 8, 8, 8],
+                   [5, 6, 6, 7, 7, 6, 6, 5],
+                   [2, 3, 3, 5, 5, 3, 3, 2],
+                   [1, 2, 3, 4, 4, 3, 2, 1],
+                   [1, 1, 2, 3, 3, 2, 1, 1],
+                   [1, 1, 1, 0, 0, 1, 1, 1],
+                   [0, 0, 0, 0, 0, 0, 0, 0]]
 
-blackPawnScores = [ [0, 0, 0, 0, 0, 0, 0, 0],
-                    [1, 1, 1, 0, 0, 1, 1, 1],
-                    [1, 1, 2, 3, 3, 2, 1, 1],
-                    [1, 2, 3, 4, 4, 3, 2, 1],
-                    [2, 3, 3, 5, 5, 3, 3, 2],
-                    [5, 6, 6, 7, 7, 6, 6, 5],
-                    [8, 8, 8, 8, 8, 8, 8, 8],
-                    [8, 8, 8, 8, 8, 8, 8, 8]]
+# Điểm vị trí của Tốt đen (ngược lại tốt trắng)
+blackPawnScores = [[0, 0, 0, 0, 0, 0, 0, 0],
+                   [1, 1, 1, 0, 0, 1, 1, 1],
+                   [1, 1, 2, 3, 3, 2, 1, 1],
+                   [1, 2, 3, 4, 4, 3, 2, 1],
+                   [2, 3, 3, 5, 5, 3, 3, 2],
+                   [5, 6, 6, 7, 7, 6, 6, 5],
+                   [8, 8, 8, 8, 8, 8, 8, 8],
+                   [8, 8, 8, 8, 8, 8, 8, 8]]
 
-piecePositionScores = {"N": knightScores, "Q": queenScores, "B": bishopScores, "R": rookScores, "bP": blackPawnScores, "wP": whitePawnScores}
+# Bảng chỉ số điểm theo vị trí cho từng loại quân cờ (bao gồm tốt trắng/đen)
+piecePositionScores = {
+    "N": knightScores,
+    "Q": queenScores,
+    "B": bishopScores,
+    "R": rookScores,
+    "bP": blackPawnScores,  # Tốt đen
+    "wP": whitePawnScores   # Tốt trắng
+}
 
+# Hằng số điểm cho chiếu hết và hòa
 CHECKMATE = 1000
 STALEMATE = 0
-DEPTH = 2
+DEPTH = 2  # Mức tối đa tìm kiếm trong Minimax hoặc AI
 
 def findRandomMove(validMoves):
+    """
+        - Trả về một nước đi ngẫu nhiên trong danh sách validMoves.
+        - Dùng khi cần bot chơi ngẫu nhiên hoặc dùng test nhanh.
+    """
     return validMoves[random.randint(0, len(validMoves) - 1)]
 
+
 def findBestMove(gs, validMoves):
-    global nextMove
-    tempCastleRight = CE.CastleRight(gs.currentCastlingRight.wks, gs.currentCastlingRight.bks, gs.currentCastlingRight.wqs, gs.currentCastlingRight.bqs)
-    nextMove = None
-    validMoves = moveOrdering(gs, validMoves)
-    findMoveNegaMaxAlphaBeta(gs, validMoves, DEPTH, -CHECKMATE,  CHECKMATE, 1 if gs.whiteToMove else -1)
-    gs.currentCastlingRight = tempCastleRight
-    return nextMove      
+    """
+        - Tìm nước đi tốt nhất dựa theo thuật toán NegaMax + AlphaBeta pruning.
+        - gs: Đối tượng GameState (bản cờ hiện tại)
+        - validMoves: Danh sách các nước đi hợp lệ
+    
+        - Gợi ra biến nextMove được chọn trong giá trị toàn cục nhất.
+    """
+    global nextMove  # Biến lưu nước đi tốt nhất tạm thời
+
+    # Lưu lại quyền nhập thành trước khi giả lập nước đi (tránh bị thay đổi khi undo)
+    tempCastleRight = CE.CastleRight(
+        gs.currentCastlingRight.wks,
+        gs.currentCastlingRight.bks,
+        gs.currentCastlingRight.wqs,
+        gs.currentCastlingRight.bqs
+    )
+
+    nextMove = None  # Reset trạng thái nước tốt nhất
+    validMoves = moveOrdering(gs, validMoves)  # Sắp xếp nước đi (gợi ý để pruning tốt hơn)
+
+    # Gọi thuật toán NegaMax với Alpha-Beta pruning
+    findMoveNegaMaxAlphaBeta(
+        gs,
+        validMoves,
+        DEPTH,               # Chiều sâu tìm kiếm
+        -CHECKMATE,          # Alpha khởi đầu
+        CHECKMATE,           # Beta khởi đầu
+        1 if gs.whiteToMove else -1  # Màu đang đi (trắng: 1, đen: -1)
+    )
+
+    gs.currentCastlingRight = tempCastleRight  # Khôi phục lại quyền nhập thành
+    return nextMove  # Trả về nước đi tốt nhất tìm được
+    
 
 def findMoveNegaMaxAlphaBeta(gs, validMoves, depth, alpha, beta, turnMultiplier):
     global nextMove
