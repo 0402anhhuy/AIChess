@@ -130,7 +130,7 @@ def findBestMove(gs, validMoves):
     findMoveNegaMaxAlphaBeta(
         gs,
         validMoves,
-        currentDepth,               # Chiều sâu tìm kiếm
+        DEPTH,               # Chiều sâu tìm kiếm
         -CHECKMATE,          # Alpha khởi đầu
         CHECKMATE,           # Beta khởi đầu
         1 if gs.whiteToMove else -1  # Màu đang đi (trắng: 1, đen: -1)
