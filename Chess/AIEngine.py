@@ -119,13 +119,6 @@ def findBestMove(gs, validMoves):
     nextMove = None  # Reset trạng thái nước tốt nhất
     validMoves = moveOrdering(gs, validMoves)  # Sắp xếp nước đi (gợi ý để pruning tốt hơn)
 
-    # Tăng độ sâu tìm kiếm khi số lượng nước đi ít hơn (cuối ván)
-    currentDepth = DEPTH
-    if len(validMoves) <= 10:
-        currentDepth = 3
-    if len(validMoves) <= 5:
-        currentDepth = 4
-
     # Gọi thuật toán NegaMax với Alpha-Beta pruning
     findMoveNegaMaxAlphaBeta(
         gs,
