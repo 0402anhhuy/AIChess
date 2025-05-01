@@ -207,15 +207,15 @@ def mainMenu():
         mouse_pos = pygame.mouse.get_pos()  # Lấy vị trí chuột
 
         # Hiển thị tiêu đề "CHESS"
-        menu_text_surface = getFont(170).render("CHESS", True, "#b68f40")
+        menu_text_surface = getFont(170).render("CHESS", True, "White")
         menu_text_rect = menu_text_surface.get_rect(center=(WIDTH * 0.5, HEIGHT * 0.15))
         SCREEN.blit(menu_text_surface, menu_text_rect)
 
         # Tạo các nút
         buttons = [
-            createButton("PLAY", (WIDTH * 0.5, HEIGHT * 0.4), 120, "#d7fcd4", "White"),
-            createButton("GUIDE", (WIDTH * 0.5, HEIGHT * 0.6), 120, "#d7fcd4", "White"),
-            createButton("QUIT", (WIDTH * 0.5, HEIGHT * 0.8), 120, "#d7fcd4", "RED")
+            createButton("PLAY", (WIDTH * 0.5, HEIGHT * 0.4), 120, "Gold", "White"),
+            createButton("GUIDE", (WIDTH * 0.5, HEIGHT * 0.6), 120, "Gold", "White"),
+            createButton("QUIT", (WIDTH * 0.5, HEIGHT * 0.8), 120, "Gold", "Red")
         ]
 
         drawButtons(buttons, mouse_pos)  # Hiển thị các nút
