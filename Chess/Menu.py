@@ -13,7 +13,7 @@ SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))  # Tạo cửa sổ hiển th�
 pygame.display.set_caption("Menu")  # Tiêu đề cửa sổ
 
 # Hình nền menu
-BG = pygame.transform.scale(pygame.image.load("Chess/assets/menu/Background.png"), (WIDTH, HEIGHT))
+BG = pygame.transform.scale(pygame.image.load("Chess/assets/menu/Background_2.png"), (WIDTH, HEIGHT))
 
 # Hàm tạo font chữ
 def getFont(size):
