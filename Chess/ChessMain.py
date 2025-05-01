@@ -23,6 +23,7 @@ TEXT_DARK_COLOR = Config.Config.TEXT_DARK_COLOR  # Màu chữ tối
 FONT = Config.Config.get_font()  # Font chữ
 TIME_WHILE_END = 2  # Thời gian chờ khi kết thúc trò chơi
 
+
 # Tải hình ảnh quân cờ (chỉ chạy một lần)
 def loadImages():
     """
@@ -113,12 +114,15 @@ def resetGame():
     return gs, validMoves, sqSelected, playerClicks, moveMade, animate, gameOver
 
 # Hàm chính để chơi game
-def play(AI):
+def play(AI, mode):
     """
         - Hàm chính để chơi game, hỗ trợ chế độ PvP và PvE.
     """
     p.init()
-    p.display.set_caption("Play with Player")  # Tiêu đề cửa sổ
+    if mode == "PvE":
+        p.display.set_caption("Play with AI")
+    else:
+        p.display.set_caption("Play with Player")
     screen = p.display.set_mode((WIDTH + MOVE_LOG_W, HEIGHT))  # Tạo cửa sổ hiển thị
     clock = p.time.Clock()
     screen.fill(p.Color("white"))
