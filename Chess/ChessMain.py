@@ -151,10 +151,10 @@ def play(AI):
                     animate = anim
                 if action == "MENU":  # Mở menu chính
                     running = False
-                    Menu.main_menu()
+                    Menu.mainMenu()
                 elif action == "PAUSE":  # Tạm dừng trò chơi
                     running = False
-                    pause_action = Menu.pause_menu()
+                    pause_action = Menu.pauseMenu()
                     if pause_action == "RESUME":  # Tiếp tục trò chơi
                         running = True
                     elif pause_action == "RESTART":  # Chơi lại
