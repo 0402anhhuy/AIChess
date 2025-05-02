@@ -121,7 +121,7 @@ def play(AI, mode):
     p.init()
     if mode == "PvE":
         p.display.set_caption("Play with AI")
-    else:
+    if mode == "PvP":
         p.display.set_caption("Play with Player")
     screen = p.display.set_mode((WIDTH + MOVE_LOG_W, HEIGHT))  # Tạo cửa sổ hiển thị
     clock = p.time.Clock()

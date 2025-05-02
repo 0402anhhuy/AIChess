@@ -68,9 +68,9 @@ def playMenu():
                 if BACK_BUTTON.checkForInput(PLAY_MOUSE_POS):  # Quay lại menu chính
                     mainMenu()
                 elif PvE_BUTTON.checkForInput(PLAY_MOUSE_POS):  # Chơi với AI
-                    ChessMain.play(True)
+                    ChessMain.play(True, "PvE")  # Chơi với AI
                 elif PvP_BUTTON.checkForInput(PLAY_MOUSE_POS):  # Chơi với người
-                    ChessMain.play(False)
+                    ChessMain.play(False, "PvP")
 
         pygame.display.update()  # Cập nhật màn hình
 
