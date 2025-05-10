@@ -207,7 +207,7 @@ def scoreBoard(gs):
                 if square[0] == 'w':
                     score += pieceScore[square[1]] + piecePositionScore * 0.1
                 elif square[0] == 'b':
-                    score -= (pieceScore[square[1]] + piecePositionScore * 0.1)
+                    score -= pieceScore[square[1]] + piecePositionScore * 0.1
 
     return score  # Trả về điểm đánh giá cuối cùng
 
