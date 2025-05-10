@@ -24,7 +24,7 @@ knightScores = [[1, 1, 1, 1, 1, 1, 1, 1],
                 [1, 2, 2, 2, 2, 2, 2, 1],
                 [1, 1, 1, 1, 1, 1, 1, 1]]
 
-# Điểm vị trí của Tượng
+# Điểm vị trí của Tượng (trên 2 đường chéo càng chính càng tốt)
 bishopScores = [[4, 3, 2, 1, 1, 2, 3, 4],
                 [3, 4, 3, 2, 2, 3, 4, 3],
                 [2, 3, 4, 3, 3, 4, 3, 2],
@@ -87,7 +87,7 @@ piecePositionScores = {
 # Hằng số điểm cho chiếu hết và hòa
 CHECKMATE = 1000
 STALEMATE = 0
-DEPTH = 2  # Mặc định, sẽ điều chỉnh linh hoạt khi tìm nước đi
+DEPTH = 3  # Mặc định, sẽ điều chỉnh linh hoạt khi tìm nước đi
 
 # Hàm thực hiện tìm nước đi ngẫu nhiên trong danh sách validMoves
 def findRandomMove(validMoves):
