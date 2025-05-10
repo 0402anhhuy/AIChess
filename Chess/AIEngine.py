@@ -218,7 +218,7 @@ def moveOrdering(gs, validMoves):
         - Ưu tiên: bắt quân mạnh, thăng cấp, nước đi trung tâm, nước đi chiếu vua, ép vua vào góc, phòng thủ khỏi chiếu.
     """
     moveScores = []
-
+    
     for move in validMoves:
         score = 0
 
