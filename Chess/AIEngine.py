@@ -1,3 +1,4 @@
+import time
 import random
 import ChessEngine as CE  # Import mô-đun logic cờ vua chứa GameState, Move, v.v.
 
@@ -289,3 +290,91 @@ def isMoveSafe(gs, move):
             return False  # Nếu có nước đi của đối thủ ăn được quân cờ tại vị trí mới, nước đi không an toàn
 
     return True  # Nếu không có nước đi nào của đối thủ ăn được quân cờ, nước đi an toàn
+
+# ==== MINIMAX ====
+nodeCountMinimax = 0
+
+def minimax(gs, depth, turnMultiplier):
+    """
+        Thuật toán Minimax cơ bản.
+            - gs: Trạng thái bàn cờ hiện tại.
+            - depth: Chiều sâu tìm kiếm.
+            - turnMultiplier: 1 nếu là lượt của trắng, -1 nếu là lượt của đen.
+    """
+    global nodeCountMinimax
+    if depth == 0:
+        return turnMultiplier * scoreBoard(gs)
+    maxScore = -10000
+    for move in gs.getValidMoves():
+        nodeCountMinimax += 1
+        gs.makeMove(move)
+        score = -minimax(gs, depth - 1, -turnMultiplier)
+        gs.undoMove()
+        if score > maxScore:
+            maxScore = score
+    return maxScore
+
+def runMinimaxComparison(gs, depth=DEPTH):
+    """
+        Chạy thuật toán Minimax và đo thời gian thực thi.
+            - gs: Trạng thái bàn cờ hiện tại.
+            - depth: Chiều sâu tìm kiếm.
+    """
+    global nodeCountMinimax
+    nodeCountMinimax = 0  # Reset bộ đếm node
+    start_time = time.time()
+    minimaxScore = minimax(gs, depth, 1 if gs.whiteToMove else -1)
+    elapsed_time = time.time() - start_time
+    return minimaxScore, nodeCountMinimax, elapsed_time
+
+# ==== NEGAMAX + ALPHA-BETA ====
+nodeCountNegaMax = 0
+
+def negamax_alpha_beta(gs, depth, alpha, beta, turnMultiplier):
+    """
+        Thuật toán NegaMax với Alpha-Beta pruning.
+            - gs: Trạng thái bàn cờ hiện tại.
+            - depth: Chiều sâu tìm kiếm.
+            - alpha: Giá trị alpha ban đầu.
+            - beta: Giá trị beta ban đầu.
+            - turnMultiplier: 1 nếu là lượt của trắng, -1 nếu là lượt của đen.
+    """
+    global nodeCountNegaMax
+    if depth == 0:
+        return turnMultiplier * scoreBoard(gs)
+    maxScore = -10000
+    for move in gs.getValidMoves():
+        nodeCountNegaMax += 1
+        gs.makeMove(move)
+        score = -negamax_alpha_beta(gs, depth - 1, -beta, -alpha, -turnMultiplier)
+        gs.undoMove()
+        if score > maxScore:
+            maxScore = score
+        alpha = max(alpha, maxScore)
+        if alpha >= beta:
+            break
+    return maxScore
+
+def runNegaMaxComparison(gs, depth=3):
+    """
+    Chạy thuật toán NegaMax với Alpha-Beta pruning và đo thời gian thực thi.
+    - gs: Trạng thái bàn cờ hiện tại.
+    - depth: Chiều sâu tìm kiếm.
+    """
+    global nodeCountNegaMax
+    nodeCountNegaMax = 0  # Reset bộ đếm node
+    start_time = time.time()
+    negamaxScore = negamax_alpha_beta(gs, depth, -10000, 10000, 1 if gs.whiteToMove else -1)
+    elapsed_time = time.time() - start_time
+    return negamaxScore, nodeCountNegaMax, elapsed_time
+
+def compareAlgorithms(gs, depth=DEPTH):
+    # Chạy Minimax
+    minimaxScore, nodeCountMinimax, timeMinimax = runMinimaxComparison(gs, depth)
+
+    # Chạy NegaMax
+    negamaxScore, nodeCountNegaMax, timeNega = runNegaMaxComparison(gs, depth)
+
+    # In kết quả
+    print(f"Minimax Score: {minimaxScore}, Nodes: {nodeCountMinimax}, Time: {timeMinimax:.4f}s")
+    print(f"NegaMax Score: {negamaxScore}, Nodes: {nodeCountNegaMax}, Time: {timeNega:.4f}s")

@@ -206,6 +206,7 @@ class GameState():
             self.currentCastlingRight.wqs,
             self.currentCastlingRight.bqs
         ))
+        
 
     # Hàm hoàn tác lại nước đi
     def undoMove(self):

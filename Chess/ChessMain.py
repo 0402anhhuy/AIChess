@@ -6,6 +6,7 @@ import Menu
 import AIEngine
 import Config
 import ChessEngine
+from AIEngine import compareAlgorithms
 
 # Khởi tạo các biến toàn cục
 IMAGES = {}  # Lưu trữ hình ảnh của các quân cờ
@@ -170,6 +171,7 @@ def play(AI, mode):
 
         if not gameOver and not humanTurn:  # Xử lý nước đi của AI
             moveMade, animate = handleAIMove(gs, validMoves)
+            compareAlgorithms(gs)
 
         if moveMade:  # Nếu có nước đi được thực hiện
             if animate:
