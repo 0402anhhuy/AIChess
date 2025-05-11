@@ -145,12 +145,12 @@ def pauseMenu():
                 sys.exit()
 
             if event.type == pygame.MOUSEBUTTONDOWN:  # Xử lý khi người dùng nhấn chuột
+                if buttons[0].checkForInput(mouse_pos):  # Quay lại menu chính
+                    mainMenu()
                 if buttons[1].checkForInput(mouse_pos):  # Tiếp tục trò chơi
                     return "RESUME"
                 if buttons[2].checkForInput(mouse_pos):  # Chơi lại
                     return "RESTART"
-                if buttons[0].checkForInput(mouse_pos):  # Quay lại menu chính
-                    mainMenu()
                 if buttons[3].checkForInput(mouse_pos):  # Thoát game
                     pygame.quit()
                     sys.exit()
@@ -190,7 +190,7 @@ def endMenu(end_text):
                 if buttons[0].checkForInput(mouse_pos):  # Quay lại menu chính
                     mainMenu()
                 if buttons[1].checkForInput(mouse_pos):  # Chơi lại
-                    ChessMain.play(False)
+                    return "RESTART"
                 if buttons[2].checkForInput(mouse_pos):  # Thoát game
                     pygame.quit()
                     sys.exit()
