@@ -6,7 +6,7 @@ import Menu
 import AIEngine
 import Config
 import ChessEngine
-from AIEngine import compareAlgorithms
+from AIEngine import compareAlgorithms, runMinimaxComparison, runNegaMaxComparison
 
 # Khởi tạo các biến toàn cục
 IMAGES = {}  # Lưu trữ hình ảnh của các quân cờ
@@ -136,7 +136,21 @@ def play(AI, mode):
     playerOne = True  # Người chơi 1 (trắng)
     playerTwo = AI  # Người chơi 2 (đen hoặc AI)
 
+    comparisonHeight = MOVE_LOG_H // 3
+    minimaxResult = {
+        "score": 0,
+        "nodes": 0,
+        "time": 0.0
+    }
+    negamaxResult = {
+        "score": 0,
+        "nodes": 0,
+        "time": 0.0
+    }
+
     while running:
+        drawGameState(screen, gs, validMoves, sqSelected, moveLogFont)  # Vẽ trạng thái bàn cờ
+        Menu.drawComparisonResult(screen, moveLogFont, minimaxResult, negamaxResult, x=WIDTH, y=MOVE_LOG_H - comparisonHeight, width=MOVE_LOG_W, height=comparisonHeight)
         humanTurn = (gs.whiteToMove and playerOne) or (not gs.whiteToMove and not playerTwo)
 
         for e in p.event.get():
@@ -171,7 +185,25 @@ def play(AI, mode):
 
         if not gameOver and not humanTurn:  # Xử lý nước đi của AI
             moveMade, animate = handleAIMove(gs, validMoves)
-            compareAlgorithms(gs)
+            minimaxScore, nodeCountMinimax, timeMinimax = runMinimaxComparison(gs, depth=3)
+            negamaxScore, nodeCountNegaMax, timeNega = runNegaMaxComparison(gs, depth=3)
+
+            # Lưu kết quả để hiển thị
+            minimaxResult = {
+                "score": minimaxScore,
+                "nodes": nodeCountMinimax,
+                "time": timeMinimax
+            }
+            negamaxResult = {
+                "score": negamaxScore,
+                "nodes": nodeCountNegaMax,
+                "time": timeNega
+            }
+        # Hiển thị kết quả so sánh
+        comparisonHeight = MOVE_LOG_H // 3  # Chiều cao chiếm 1/3 bảng log
+        Menu.drawComparisonResult(screen, moveLogFont, minimaxResult, negamaxResult, x=WIDTH, y=MOVE_LOG_H - comparisonHeight, width=MOVE_LOG_W, height=comparisonHeight)
+    
+        p.display.flip()  # Cập nhật màn hình
 
         if moveMade:  # Nếu có nước đi được thực hiện
             if animate:

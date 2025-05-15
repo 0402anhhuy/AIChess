@@ -197,6 +197,42 @@ def endMenu(end_text):
 
         pygame.display.update()  # Cập nhật màn hình
 
+def drawComparisonResult(screen, font, minimaxResult, negamaxResult, x, y, width, height):
+    """
+        Hiển thị kết quả so sánh giữa Minimax và NegaMax trên giao diện.
+            - screen: Màn hình Pygame.
+            - font: Font chữ để hiển thị.
+            - minimaxResult: Kết quả của Minimax (score, nodes, time).
+            - negamaxResult: Kết quả của NegaMax (score, nodes, time).
+            - x, y: Tọa độ góc trên bên trái của vùng hiển thị.
+            - width, height: Kích thước vùng hiển thị.
+    """
+    # Vẽ khung nền cho phần so sánh
+    pygame.draw.rect(screen, (200, 200, 200), (x, y, width, height))
+    pygame.draw.rect(screen, (0, 0, 0), (x, y, width, height), 2)  # Viền đen
+
+    # Hiển thị kết quả Minimax
+    minimaxTitle = font.render("Minimax:", True, (0, 0, 0))
+    minimaxScore = font.render(f"Score: {minimaxResult['score']}", True, (0, 0, 0))
+    minimaxNodes = font.render(f"Nodes: {minimaxResult['nodes']}", True, (0, 0, 0))
+    minimaxTime = font.render(f"Time: {minimaxResult['time']:.4f}s", True, (0, 0, 0))
+
+    screen.blit(minimaxTitle, (x + 10, y + 10))
+    screen.blit(minimaxScore, (x + 10, y + 40))
+    screen.blit(minimaxNodes, (x + 10, y + 70))
+    screen.blit(minimaxTime, (x + 10, y + 100))
+
+    # Hiển thị kết quả NegaMax
+    negamaxTitle = font.render("NegaMax + Alpha-Beta:", True, (0, 0, 0))
+    negamaxScore = font.render(f"Score: {negamaxResult['score']}", True, (0, 0, 0))
+    negamaxNodes = font.render(f"Nodes: {negamaxResult['nodes']}", True, (0, 0, 0))
+    negamaxTime = font.render(f"Time: {negamaxResult['time']:.4f}s", True, (0, 0, 0))
+
+    screen.blit(negamaxTitle, (x + 10, y + 140))
+    screen.blit(negamaxScore, (x + 10, y + 170))
+    screen.blit(negamaxNodes, (x + 10, y + 200))
+    screen.blit(negamaxTime, (x + 10, y + 230))
+
 # Hàm tạo menu chính cho trò chơi
 def mainMenu():
     """
