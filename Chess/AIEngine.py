@@ -357,12 +357,12 @@ def negamax_alpha_beta(gs, depth, alpha, beta, turnMultiplier):
 
 def runNegaMaxComparison(gs, depth=3):
     """
-    Chạy thuật toán NegaMax với Alpha-Beta pruning và đo thời gian thực thi.
-    - gs: Trạng thái bàn cờ hiện tại.
-    - depth: Chiều sâu tìm kiếm.
+        Chạy thuật toán NegaMax với Alpha-Beta pruning và đo thời gian thực thi.
+            - gs: Trạng thái bàn cờ hiện tại.
+            - depth: Chiều sâu tìm kiếm.
     """
     global nodeCountNegaMax
-    nodeCountNegaMax = 0  # Reset bộ đếm node
+    nodeCountNegaMax = 0
     start_time = time.time()
     negamaxScore = negamax_alpha_beta(gs, depth, -10000, 10000, 1 if gs.whiteToMove else -1)
     elapsed_time = time.time() - start_time
