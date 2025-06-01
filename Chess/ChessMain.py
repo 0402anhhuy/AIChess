@@ -6,7 +6,7 @@ import Menu
 import AIEngine
 import Config
 import ChessEngine
-from AIEngine import compareAlgorithms, runMinimaxComparison, runNegaMaxComparison
+from AIEngine import runMinimaxComparison, runNegaMaxComparison
 
 # Khởi tạo các biến toàn cục
 IMAGES = {}  # Lưu trữ hình ảnh của các quân cờ
@@ -200,10 +200,10 @@ def play(AI, mode):
                 "time": timeNega
             }
         # Hiển thị kết quả so sánh
-        comparisonHeight = MOVE_LOG_H // 3  # Chiều cao chiếm 1/3 bảng log
+        comparisonHeight = MOVE_LOG_H // 3
         Menu.drawComparisonResult(screen, moveLogFont, minimaxResult, negamaxResult, x=WIDTH, y=MOVE_LOG_H - comparisonHeight, width=MOVE_LOG_W, height=comparisonHeight)
     
-        p.display.flip()  # Cập nhật màn hình
+        p.display.flip()
 
         if moveMade:  # Nếu có nước đi được thực hiện
             if animate:
@@ -335,12 +335,10 @@ def animateMove(move, screen, board, clock):
             if move.isEnpassantMove:
                 enPassantRow = move.endRow + 1 if move.pieceCaptured[0] == "b" else move.endRow - 1
                 endSquare = p.Rect(move.endCol * SQ_SIZE, enPassantRow * SQ_SIZE, SQ_SIZE, SQ_SIZE)
-            screen.blit(IMAGES[move.pieceCaptured],
-                        (move.endCol * SQ_SIZE + 10, move.endRow * SQ_SIZE + 10))
+            screen.blit(IMAGES[move.pieceCaptured], (move.endCol * SQ_SIZE + 10, move.endRow * SQ_SIZE + 10))
 
         # Vẽ quân đang di chuyển theo từng frame
-        screen.blit(IMAGES[move.pieceMoved],
-                    p.Rect(c * SQ_SIZE + 10, r * SQ_SIZE + 10, SQ_SIZE - 20, SQ_SIZE - 20))
+        screen.blit(IMAGES[move.pieceMoved], p.Rect(c * SQ_SIZE + 10, r * SQ_SIZE + 10, SQ_SIZE - 20, SQ_SIZE - 20))
 
         # Cập nhật màn hình và chờ frame kế
         p.display.flip()
