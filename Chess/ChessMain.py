@@ -30,13 +30,17 @@ def loadImages():
     """
         - Tải hình ảnh của các quân cờ và lưu vào biến toàn cục IMAGES.
     """
-    pieces = ["wP", "wR", "wN", "wB", "wQ", "wK", "bP", "bR", "bN", "bB", "bQ", "bK"]
+    pieces = ["wP", "wR", "wN", "wB", "wQ",
+              "wK", "bP", "bR", "bN", "bB", "bQ", "bK"]
     for piece in pieces:
         IMAGES[piece] = p.transform.scale(
-            p.image.load("Chess/assets/images/" + piece + ".png"), (SQ_SIZE - 20, SQ_SIZE - 20)
+            p.image.load("Chess/assets/images/" + piece +
+                         ".png"), (SQ_SIZE - 20, SQ_SIZE - 20)
         )
 
 # Xử lý sự kiện nhấp chuột
+
+
 def handleMouseClick(e, gs, sqSelected, playerClicks, validMoves, humanTurn):
     """
         - Xử lý sự kiện nhấp chuột để chọn ô vuông và thực hiện nước đi.
@@ -47,7 +51,8 @@ def handleMouseClick(e, gs, sqSelected, playerClicks, validMoves, humanTurn):
         location = p.mouse.get_pos()  # Lấy vị trí chuột
         col = location[0] // SQ_SIZE  # Xác định cột
         row = location[1] // SQ_SIZE  # Xác định hàng
-        if sqSelected == (row, col) or col >= 8:  # Nếu nhấp lại vào ô đã chọn hoặc ngoài bàn cờ
+        # Nếu nhấp lại vào ô đã chọn hoặc ngoài bàn cờ
+        if sqSelected == (row, col) or col >= 8:
             sqSelected = ()
             playerClicks = []
         else:
@@ -64,10 +69,13 @@ def handleMouseClick(e, gs, sqSelected, playerClicks, validMoves, humanTurn):
                     playerClicks = []
                     break
             if not moveMade:
-                playerClicks = [sqSelected]  # Nếu nước đi không hợp lệ, giữ lại ô đã chọn
+                # Nếu nước đi không hợp lệ, giữ lại ô đã chọn
+                playerClicks = [sqSelected]
     return sqSelected, playerClicks, moveMade, animate
 
 # Xử lý sự kiện nhấn phím
+
+
 def handleKeyPress(e, gs):
     """
         - Xử lý sự kiện nhấn phím để hoàn tác nước đi, mở menu hoặc tạm dừng trò chơi.
@@ -86,6 +94,8 @@ def handleKeyPress(e, gs):
     return moveMade, animate, gameOver, action
 
 # Xử lý nước đi của AI
+
+
 def handleAIMove(gs, validMoves):
     """
         - Xử lý nước đi của AI bằng cách tìm nước đi tốt nhất hoặc ngẫu nhiên.
@@ -101,6 +111,8 @@ def handleAIMove(gs, validMoves):
     return moveMade, animate
 
 # Đặt lại trạng thái trò chơi
+
+
 def resetGame():
     """
         - Đặt lại trạng thái trò chơi về ban đầu.
@@ -115,6 +127,8 @@ def resetGame():
     return gs, validMoves, sqSelected, playerClicks, moveMade, animate, gameOver
 
 # Hàm chính để chơi game
+
+
 def play(AI, mode):
     """
         - Hàm chính để chơi game, hỗ trợ chế độ PvP và PvE.
@@ -124,10 +138,12 @@ def play(AI, mode):
         p.display.set_caption("Play with AI")
     if mode == "PvP":
         p.display.set_caption("Play with Player")
-    screen = p.display.set_mode((WIDTH + MOVE_LOG_W, HEIGHT))  # Tạo cửa sổ hiển thị
+    screen = p.display.set_mode(
+        (WIDTH + MOVE_LOG_W, HEIGHT))  # Tạo cửa sổ hiển thị
     clock = p.time.Clock()
     screen.fill(p.Color("white"))
-    moveLogFont = p.font.SysFont("Arial", 20, False, False)  # Font chữ cho bảng ghi nước đi
+    # Font chữ cho bảng ghi nước đi
+    moveLogFont = p.font.SysFont("Arial", 20, False, False)
 
     # Đặt lại trạng thái trò chơi
     gs, validMoves, sqSelected, playerClicks, moveMade, animate, gameOver = resetGame()
@@ -149,9 +165,12 @@ def play(AI, mode):
     }
 
     while running:
-        drawGameState(screen, gs, validMoves, sqSelected, moveLogFont)  # Vẽ trạng thái bàn cờ
-        Menu.drawComparisonResult(screen, moveLogFont, minimaxResult, negamaxResult, x=WIDTH, y=MOVE_LOG_H - comparisonHeight, width=MOVE_LOG_W, height=comparisonHeight)
-        humanTurn = (gs.whiteToMove and playerOne) or (not gs.whiteToMove and not playerTwo)
+        drawGameState(screen, gs, validMoves, sqSelected,
+                      moveLogFont)  # Vẽ trạng thái bàn cờ
+        Menu.drawComparisonResult(screen, moveLogFont, minimaxResult, negamaxResult, x=WIDTH,
+                                  y=MOVE_LOG_H - comparisonHeight, width=MOVE_LOG_W, height=comparisonHeight)
+        humanTurn = (gs.whiteToMove and playerOne) or (
+            not gs.whiteToMove and not playerTwo)
 
         for e in p.event.get():
             if e.type == p.QUIT:  # Thoát game
@@ -185,8 +204,10 @@ def play(AI, mode):
 
         if not gameOver and not humanTurn:  # Xử lý nước đi của AI
             moveMade, animate = handleAIMove(gs, validMoves)
-            minimaxScore, nodeCountMinimax, timeMinimax = runMinimaxComparison(gs, depth=3)
-            negamaxScore, nodeCountNegaMax, timeNega = runNegaMaxComparison(gs, depth=3)
+            minimaxScore, nodeCountMinimax, timeMinimax = runMinimaxComparison(
+                gs, depth=3)
+            negamaxScore, nodeCountNegaMax, timeNega = runNegaMaxComparison(
+                gs, depth=3)
 
             # Lưu kết quả để hiển thị
             minimaxResult = {
@@ -201,18 +222,21 @@ def play(AI, mode):
             }
         # Hiển thị kết quả so sánh
         comparisonHeight = MOVE_LOG_H // 3
-        Menu.drawComparisonResult(screen, moveLogFont, minimaxResult, negamaxResult, x=WIDTH, y=MOVE_LOG_H - comparisonHeight, width=MOVE_LOG_W, height=comparisonHeight)
-    
+        Menu.drawComparisonResult(screen, moveLogFont, minimaxResult, negamaxResult, x=WIDTH,
+                                  y=MOVE_LOG_H - comparisonHeight, width=MOVE_LOG_W, height=comparisonHeight)
+
         p.display.flip()
 
         if moveMade:  # Nếu có nước đi được thực hiện
             if animate:
-                animateMove(gs.moveLog[-1], screen, gs.board, clock)  # Hiển thị hoạt ảnh nước đi
+                # Hiển thị hoạt ảnh nước đi
+                animateMove(gs.moveLog[-1], screen, gs.board, clock)
             validMoves = gs.getValidMoves()  # Cập nhật danh sách nước đi hợp lệ
             moveMade = False
             animate = False
 
-        drawGameState(screen, gs, validMoves, sqSelected, moveLogFont)  # Vẽ trạng thái bàn cờ
+        drawGameState(screen, gs, validMoves, sqSelected,
+                      moveLogFont)  # Vẽ trạng thái bàn cờ
 
         end_text = None
         if gs.checkMate:  # Kiểm tra chiếu hết
@@ -234,6 +258,8 @@ def play(AI, mode):
             Menu.endMenu(end_text)
 
 # Các hàm vẽ bàn cờ, quân cờ, lịch sử nước đi, và hoạt ảnh
+
+
 def drawBoard(screen):
     """
         - Vẽ bàn cờ với các ô sáng và tối xen kẽ.
@@ -244,9 +270,12 @@ def drawBoard(screen):
     for row in range(DIMENSION):
         for column in range(DIMENSION):
             color = colors[(row + column) % 2]
-            p.draw.rect(screen, color, p.Rect(column * SQ_SIZE, row * SQ_SIZE, SQ_SIZE, SQ_SIZE))
+            p.draw.rect(screen, color, p.Rect(
+                column * SQ_SIZE, row * SQ_SIZE, SQ_SIZE, SQ_SIZE))
 
 # Hàm thực hiện vẽ quân cờ trong trò chơi
+
+
 def drawPiece(screen, board):
     """
         - Vẽ các quân cờ trên bàn cờ.
@@ -262,6 +291,8 @@ def drawPiece(screen, board):
                 screen.blit(IMAGES[piece], p.Rect(x, y, NEW_SIZE, NEW_SIZE))
 
 # Hàm đánh dấu các nước đi hợp lệ cho mỗi quân cờ
+
+
 def highlightSquares(screen, gs, validMoves, sqSelected):
     """
         - Đánh dấu các ô vuông mà người chơi đã chọn và các ô vuông mà người chơi có thể di chuyển.
@@ -276,9 +307,12 @@ def highlightSquares(screen, gs, validMoves, sqSelected):
             s.fill(p.Color("yellow"))  # Màu ô có thể di chuyển
             for move in validMoves:
                 if move.startRow == row and move.startCol == column:
-                    screen.blit(s, (move.endCol * SQ_SIZE, move.endRow * SQ_SIZE))
+                    screen.blit(
+                        s, (move.endCol * SQ_SIZE, move.endRow * SQ_SIZE))
 
 # Hàm ghi lại lịch sử các nước đi
+
+
 def drawMoveLog(screen, gs, font):
     """
         - Vẽ lịch sử các nước đi ở bên phải bàn cờ.
@@ -307,6 +341,8 @@ def drawMoveLog(screen, gs, font):
         textY += textObject.get_height() + lineSpacing
 
 # Hàm tạo hoạt ảnh cho quân cờ khi di chuyển trong trò chơi
+
+
 def animateMove(move, screen, board, clock):
     """
         - Hiển thị hoạt ảnh khi quân cờ di chuyển.
@@ -326,25 +362,33 @@ def animateMove(move, screen, board, clock):
         drawPiece(screen, board)
 
         # Tô lại ô đích trước khi vẽ hoạt ảnh
-        color = p.Color(SQ_LIGHT_COLOR) if (move.endRow + move.endCol) % 2 == 0 else p.Color(SQ_DARK_COLOR)
-        endSquare = p.Rect(move.endCol * SQ_SIZE, move.endRow * SQ_SIZE, SQ_SIZE, SQ_SIZE)
+        color = p.Color(SQ_LIGHT_COLOR) if (
+            move.endRow + move.endCol) % 2 == 0 else p.Color(SQ_DARK_COLOR)
+        endSquare = p.Rect(move.endCol * SQ_SIZE,
+                           move.endRow * SQ_SIZE, SQ_SIZE, SQ_SIZE)
         p.draw.rect(screen, color, endSquare)
 
         # Vẽ lại quân bị bắt (nếu có)
         if move.pieceCaptured != "--":
             if move.isEnpassantMove:
-                enPassantRow = move.endRow + 1 if move.pieceCaptured[0] == "b" else move.endRow - 1
-                endSquare = p.Rect(move.endCol * SQ_SIZE, enPassantRow * SQ_SIZE, SQ_SIZE, SQ_SIZE)
-            screen.blit(IMAGES[move.pieceCaptured], (move.endCol * SQ_SIZE + 10, move.endRow * SQ_SIZE + 10))
+                enPassantRow = move.endRow + \
+                    1 if move.pieceCaptured[0] == "b" else move.endRow - 1
+                endSquare = p.Rect(move.endCol * SQ_SIZE,
+                                   enPassantRow * SQ_SIZE, SQ_SIZE, SQ_SIZE)
+            screen.blit(IMAGES[move.pieceCaptured], (move.endCol *
+                        SQ_SIZE + 10, move.endRow * SQ_SIZE + 10))
 
         # Vẽ quân đang di chuyển theo từng frame
-        screen.blit(IMAGES[move.pieceMoved], p.Rect(c * SQ_SIZE + 10, r * SQ_SIZE + 10, SQ_SIZE - 20, SQ_SIZE - 20))
+        screen.blit(IMAGES[move.pieceMoved], p.Rect(
+            c * SQ_SIZE + 10, r * SQ_SIZE + 10, SQ_SIZE - 20, SQ_SIZE - 20))
 
         # Cập nhật màn hình và chờ frame kế
         p.display.flip()
         clock.tick(60)
 
 # Hàm thực hiện vẽ văn bản
+
+
 def drawText(screen, text):
     """
         - Hiển thị văn bản ở giữa màn hình.
@@ -357,6 +401,8 @@ def drawText(screen, text):
     screen.blit(textObject, textLocation)
 
 # Hàm thực hiện vẽ trạng thái của trò chơi
+
+
 def drawGameState(screen, gs, validMoves, sqSelected, moveLogFont):
     """
         - Vẽ toàn bộ trạng thái bàn cờ, bao gồm bàn cờ, quân cờ, các ô được đánh dấu, và lịch sử nước đi.
