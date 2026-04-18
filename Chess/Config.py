@@ -1,7 +1,7 @@
 class Config:
     # Kích thước tổng thể của bàn cờ (pixels)
-    WIDTH = 768
-    HEIGHT = 768
+    WIDTH = 650
+    HEIGHT = 650
 
     # Số hàng và cột trên bàn cờ (8x8 ô)
     DIMENSION = 8
