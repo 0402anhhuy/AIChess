@@ -15,5 +15,5 @@ Vai trò của các file như sau:
 ```bash
 git clone https://github.com/0402anhhuy/AIChess.git
 pip install -r requirements.txt
-python Chess/main.py
+python Chess/Main.py
 ```
